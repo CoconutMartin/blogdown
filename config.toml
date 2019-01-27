@@ -1,7 +1,7 @@
 baseURL = "/"
 languageCode = "en-us"
 title = ""
-description = "This is where we try to model finance-related things with R."
+description = "This is where we try to model things related to finance."
 theme = "min_night"
 disqusShortname = ""
 googleAnalytics = ""
@@ -12,7 +12,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 
 [params]
     author = "Nate Day"
-    description = "This is where we try to model finance-related things with R."
+    description = "This is where we try to model things related to finance."
     logo = "favicon/birdmath.png"
     #twitterAuthor = "@natedayta"
     #githubUsername = "nathancday"
