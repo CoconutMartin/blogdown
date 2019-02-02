@@ -79,7 +79,7 @@ natgas.chg %>%
 
 ...but I will base the trading signal off the observed seasonality of median returns for now, with positions placed by the start of the month. Backtesting rules based on seasonality:
 
-Short: Feb, May-Jul, Nov (could NatGas' rally until end-Nov18 be an outlier?)
+Short: Feb, May-Jul, Nov (could have NatGas' rally until end-Nov18 be an outlier?)
 
 Long:  Mar-Apr, Aug-Oct, Dec-Jan 
 
