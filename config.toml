@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://birdmath.netlify.com/"
 languageCode = "en-us"
 title = ""
 description = "Past performance could be an indication of the future"
@@ -52,11 +52,6 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     url = "mailto:emcmunsayac@gmail.com"
     name = "envelope-o"
     weight = 1
-
-#[[menu.icon]]
-#    url = "https://github.com/NathanCDay"
-#    name = "github"
-#    weight = 2
 
 [[menu.icon]]
     url = "https://twitter.com/coco_not_martin/"
