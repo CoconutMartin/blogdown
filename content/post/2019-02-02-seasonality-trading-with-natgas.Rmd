@@ -9,10 +9,10 @@ tags:
   - R
 ---
 
-I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the "good" trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable,  which will then be followed up by lower prices as demand normalizes during the non-winter season.
+I have seen some seasonality patterns in NatGas that seemed to generate decent returns with the benefit of hindsight. I haven't really done any work to test if those patterns held up consistently in the past so I might just be remembering the "good" trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable, which will then be followed up by lower prices as demand normalizes during the non-winter season.
 
 ```{r, include=FALSE}
-library(tidyquant); library(jsonlite); library(timetk); library(forecast)
+library(tidyquant); library(jsonlite); library(timetk); library(forecast); library(caret)
 knitr::opts_chunk$set(echo=FALSE, message=FALSE, fig.width = 8)
 
 json_file <- 'https://datahub.io/core/natural-gas/datapackage.json'
@@ -41,21 +41,21 @@ natgas.chg <- data %>%
     Date = paste0(Month, "-01") %>% ymd(),
     mo = month.abb[month(Date)],
     mo = factor(mo, levels = unique(mo)),
-    natgas.chg = natgas / lag(natgas) - 1
-    ) %>% 
-  na.omit()
+    natgas.chg = natgas / lag(natgas) - 1,
+    natgas.chg = ifelse(is.na(natgas.chg), 0, natgas.chg),
+    m.ret = ifelse(natgas.chg > 0, "up", "down"),
+    m.ret = factor(m.ret, levels = unique(m.ret)),
+    season = ifelse(month(Date) %in% c(1, 2, 12), "Winter",
+                    ifelse(month(Date) %in% c(3:5), "Spring",
+                           ifelse(month(Date) %in% c(6:8), "Summer", "Autumn"))),
+    season = factor(season, levels = unique(season))
+    )
 ```
 
-What is pretty counter-intuitive though is that basing of NatGas' monthly median returns, prices rally from end-Feb to end-April, eases down until end-July before heading up until end-October, out-of-synch with the US seasons. I might be missing something here. 
+What is pretty counter intuitive though is that based on NatGas' monthly median returns, prices rally from end-Feb to end-April, eases down until end-July before heading up until end-October, out-of-synch with the seasons in the US so I might be missing something here. 
 
 ```{r, fig.width=8}
 natgas.chg %>% 
-  select(Date, mo, everything(), -Month) %>% 
-  mutate(
-    season = ifelse(month(Date) %in% c(1, 2, 12), "Winter",
-                    ifelse(month(Date) %in% c(3:5), "Spring",
-                           ifelse(month(Date) %in% c(6:8), "Summer", "Autumn")))
-  ) %>% 
   ggplot(aes(mo, natgas.chg))+
   geom_boxplot(aes(fill = season), width = 0.5, alpha = 0.3) +
   geom_jitter(width = 0.1, show.legend = FALSE) +
@@ -79,15 +79,15 @@ natgas.chg %>%
 
 ...but I'll base the trading signal off the observed seasonality of median returns for now. Backtesting rules based on seasonality:
 
-Short: Feb, May-Jul, Nov
+Short: Feb, May-Jul, Nov (could NatGas's rally until end-Nov18 might be an outlier?)
 
 Long:  Mar-Apr, Aug-Oct, Dec-Jan 
 
 *Positions are placed by month end.
 
 ```{r, warning=FALSE}
-long.months <-  c("Jan", "Mar", "Apr", "Aug", "Sep", "Oct", "Dec") #c("Aug", "Sep", "Oct", "Nov", "Dec", "Jan")  
-short.months <- c("Feb", "May", "Jun", "Jul", "Nov")
+long.months <-  c("Jan", "Mar", "Apr", "Aug", "Sep", "Oct", "Dec")
+short.months <- c("Feb", "May", "Jun", "Jul")
 
 signal.returns <- natgas.chg %>% 
   select(Date, mo, natgas.chg) %>% 
@@ -130,7 +130,7 @@ short.only <- natgas.chg %>%
     )
 ```
 
-Looking at the backtest results, the long-short strategy have worked well in the past up until it started underperforming in mid-2012 where long-only began outperforming both long-short and short-only, and further decaying until end 2017. Short-side of the trade drove the performance decay that probably came from a demand shock (demand remained persistent despite warmer temperatures, lower warm temperatures). 
+Looking at the backtest results, the long-short strategy have worked well in the past up until it started underperforming in mid-2012 where long-only began outperforming both long-short and short-only, and further decaying until end 2017. Short-side of the trade drove the performance decay that probably came from a supply/demand shock (supply disruption, persistent demand despite warmer temperatures, lower warm temperatures). 
 
 ```{r, warning=FALSE, fig.width=8}
 premium <- data.frame(
@@ -160,9 +160,9 @@ premium %>%
             color = NA,
             fill = "#FFDAB9") +
   geom_line(size = 0.75) +
-  annotate("text", x = ymd("2005-07-01"), y = 500, label = "Ukraine-Russia gas dispute", angle = 90) +
-  annotate("text", x = ymd("2008-05-01"), y = 500, label = "Global Financial Crisis", angle = 90) +
-  annotate("text", x = ymd("2018-06-01"), y = 500, label = "Testing period", angle = 90) +
+  annotate("text", x = ymd("2005-07-01"), y = 200, label = "Ukraine-Russia gas dispute", angle = 90) +
+  annotate("text", x = ymd("2008-05-01"), y = 200, label = "Global Financial Crisis", angle = 90) +
+  annotate("text", x = ymd("2018-06-01"), y = 200, label = "Testing period", angle = 90) +
   labs(title = "Strategy outperformance relative to buy-and-hold", 
        y = "Spread in percentage points",
        x = "") +
@@ -305,6 +305,103 @@ data.frame(
        x = "") +
   scale_x_date(date_breaks = "1 years", date_labels = "%Y") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+Feeding the "seasonal" hypothesis, we quickly build a bayesian logistic regression to see if this pattern is statistically significant. Turns out it is not given the insignificant Pr(>|z|) values that the model spits out. I'll tests the trading signals derived from the model just to check how it would have performed historically. 
+
+```{r, warning=TRUE}
+natgas.train <- natgas.chg %>% filter(year(Date) < 2017)
+natgas.test <- natgas.chg %>% filter(year(Date) >= 2017)
+
+natgas.ctrl <- trainControl(method = "timeslice",
+                            initialWindow = 12 * 5,
+                            horizon = 12,
+                            fixedWindow = FALSE,
+                            summaryFunction = twoClassSummary,
+                            classProbs = TRUE,
+                            savePredictions = TRUE)
+
+set.seed(999)
+
+natgas.model <- train(m.ret ~ mo + season,
+                      data = natgas.train,
+                      method = "bayesglm",
+                      metric = "ROC",
+                      trControl = natgas.ctrl)
+
+natgas.signal <- data.frame(glm.pred = predict(natgas.model, natgas.chg))
+
+summary(natgas.model)
+```
+
+The model was still able to generate decent accuracy despite the insignificant Pr(>|z|) values.
+
+```{r}
+confusionMatrix(natgas.chg$m.ret, natgas.signal$glm.pred)
+```
+
+The models were still able to generate a decent equity curve except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season). 
+
+```{r, fig.width=8, fig.height=8, warning=FALSE}
+natgas.train$glm.pred <- predict(natgas.model, natgas.train)
+natgas.test$glm.pred <- predict(natgas.model, natgas.test)
+
+bind_rows(natgas.train, natgas.test) %>% 
+  mutate(glm.long = ifelse(glm.pred == "up", 1, 0),
+         glm.short = ifelse(glm.pred == "down", -1, 0),
+         glm.long.short = ifelse(glm.pred == "up", 1,
+                                 ifelse(glm.pred == "down", -1, 0)),
+         glm.long.return = glm.long * natgas.chg,
+         glm.short.return = glm.short * natgas.chg,
+         glm.long.short.return = glm.long.short * natgas.chg,
+         x.buyhold = natgas.chg) %>% 
+  select(Date, glm.long.return, glm.short.return, glm.long.short.return, x.buyhold) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(annual.return = rollapplyr(1+value, FUN = prod, width = 12, na.pad = TRUE, na.rm = TRUE) - 1,
+         total.return = cumprod(1+value) - 1) %>% 
+  select(-value) %>% 
+  gather(key2, value, -Date, -key) %>% 
+  ggplot(aes(Date, value * 100, color = key)) +
+  geom_rect(aes(xmin = ymd("2005-03-01"), xmax = ymd("2006-01-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Global Financial Crisis
+  geom_rect(aes(xmin = ymd("2007-06-01"), xmax = ymd("2009-03-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Testing period
+  geom_rect(aes(xmin = ymd("2017-01-01"), xmax = ymd("2019-12-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "#FFDAB9") +
+  geom_line(size = 0.75) +
+  #annotate("text", x = ymd("2005-07-01"), y = 100, label = "Ukraine-Russia gas dispute", angle = 90) +
+  #annotate("text", x = ymd("2008-05-01"), y = 100, label = "Global Financial Crisis", angle = 90) +
+  #annotate("text", x = ymd("2018-06-01"), y = 100, label = "Testing period", angle = 90) +
+  labs(title = "Performance of Bayesian GLMs", 
+       y = "Returns (%)",
+       x = "") +
+  scale_x_date(date_breaks = "1 years", date_labels = "%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  facet_wrap(~key2, scales = "free", nrow = 2)
+```
+
+To date, the Bayesian GLM model is correct in its predictions as far as January 2019 is concerned. Despite its flaws, the model deserves further research given its potential as seen in its equity curve during backtesting before completely shelving it off. 
+
+```{r}
+pred.2019 <- natgas.test %>% 
+  filter(year(Date) == 2018) %>% 
+  select(Date, mo, season) %>% 
+  mutate(Date = floor_date(Date, "months") %m+% years(1))
+
+pred.2019$glm.pred <- predict(natgas.model, pred.2019)
+
+pred.2019 %>% 
+  knitr::kable() %>% 
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
 Overall, implementing a long-only strategy based on identified strong periods have generated good returns relative to long-short and short-only strategies. However, returns are significantly volatile over the testing periods, suggesting more prudent position sizing is warranted. 
