@@ -2,7 +2,7 @@
 title: PSEI Trading Range
 author: Coconut Martin
 date: '2019-02-02'
-slug: psei-trading-range
+slug: PSEI-trading-range
 categories:
   - charting
 tags:
@@ -26,50 +26,53 @@ target_year <- 2019
 years_cutoff <- 10
 filler_label <- paste0(as.character(previous_year - years_cutoff - 1), "-", as.character(previous_year - 1))
 
+ticker <- c("PSEI")
+
 wkly <- x %>% 
-  select(Date, PSEI) %>% 
+  select(Date, ticker) %>% 
   tq_transmute(mutate_fun = to.period,
                period = "week") %>% 
   mutate(yr = year(Date),
          mon = month.abb[month(Date)],
          wk = week(Date)) %>% 
   filter(yr <= previous_year & yr >= (previous_year - years_cutoff)) %>% 
-  group_by(yr) %>% 
-  mutate(chg = cumprod(1 + clean(ROC(PSEI, n = 1, type = "discrete"))) - 1) %>% 
-  group_by(mon, wk) %>% 
+  gather(key, value, -c(Date, yr, mon, wk)) %>% 
+  group_by(yr, key) %>% 
+  mutate(chg = cumprod(1 + clean(ROC(value, n = 1, type = "discrete"))) - 1) %>% 
+  group_by(mon, wk, key) %>% 
   summarise(bottom = min(chg, na.rm = TRUE) * 100,
             top = max(chg, na.rm = TRUE) * 100) %>% 
   arrange(wk)
 ```
 
-```{r, fig.width=8, message=FALSE}
+```{r, fig.width=6, message=FALSE}
 tw18 <- x %>% 
-  select(Date, PSEI) %>% 
+  select(Date, ticker) %>% 
   tq_transmute(mutate_fun = to.period,
                period = "week") %>% 
   mutate(yr = year(Date),
          mon = month.abb[month(Date)],
          wk = week(Date)) %>% 
   filter(yr == 2018) %>% 
-  group_by(yr) %>% 
-  mutate(chg = ROC(PSEI, n = 1, type = "discrete") %>% clean,
-         total.2018 = (cumprod(1 + chg) - 1) * 100) %>% 
+  gather(key, value, -c(Date, yr, mon, wk)) %>% 
+  group_by(yr, key) %>% 
+  mutate(total.2018 = (cumprod(1 + clean(ROC(value, n = 1, type = "discrete"))) - 1) * 100) %>% 
   ungroup() %>% 
-  select(mon, wk, total.2018)
+  select(mon, wk, total.2018, key)
   
 tw19 <- x %>% 
-  select(Date, PSEI) %>% 
+  select(Date, ticker) %>% 
   tq_transmute(mutate_fun = to.period,
                period = "week") %>% 
   mutate(yr = year(Date),
          mon = month.abb[month(Date)],
          wk = week(Date)) %>% 
   filter(yr == 2019) %>% 
-  group_by(yr) %>% 
-  mutate(chg = ROC(PSEI, n = 1, type = "discrete") %>% clean,
-         total.2019 = (cumprod(1 + chg) - 1) * 100) %>% 
+  gather(key, value, -c(Date, yr, mon, wk)) %>% 
+  group_by(yr, key) %>% 
+  mutate(total.2019 = (cumprod(1 + clean(ROC(value, n = 1, type = "discrete"))) - 1) * 100) %>% 
   ungroup() %>% 
-  select(mon, wk, total.2019)
+  select(mon, wk, total.2019, key)
 
 plt <- tw18 %>% 
   left_join(., tw19) %>% 
@@ -80,14 +83,16 @@ plt <- tw18 %>%
   geom_line(aes(y = total.2019, color = "2019"), size = 1.1) +
   geom_line(aes(y = 0), color = "grey20", linetype = "dotted") +
   geom_ribbon(aes(ymin = bottom, ymax = top), fill = "red", alpha = 0.10) +
-  labs(title = paste0("PSEI Historical Range from ", previous_year - years_cutoff, " to ", previous_year),
+  labs(title = paste0(ticker, " Historical Range from ", previous_year - years_cutoff, " to ", previous_year),
        x = "",
        y = "Returns [%]") +
   theme_tq() + 
   scale_color_manual(values = c("grey20", "#C00000"), name = "Year") +
   scale_x_date(date_labels = "%b", date_breaks = "2 month") +
-  theme(panel.grid = element_blank())
+  theme(panel.grid = element_blank()) +
+  facet_wrap(~key, scales = "free")
 
-plotly::ggplotly(plt)
+plotly::ggplotly(plt) %>% 
+  plotly::layout(title = paste0(ticker, " Historical Range from ", previous_year - years_cutoff, " to ", previous_year))
 ```
 
