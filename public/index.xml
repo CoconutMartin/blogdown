@@ -12,12 +12,36 @@
     
     
     <item>
-      <title>Project 1</title>
-      <link>/project/project1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <title>PSEI Trading Range</title>
+      <link>/project/psei-trading-range/</link>
+      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>/project/project1/</guid>
-      <description></description>
+      <guid>/project/psei-trading-range/</guid>
+      <description>{&#34;x&#34;:{&#34;data&#34;:[{&#34;x&#34;:[17903,17910,17917,17924,17931,17938,17945,17952,17959,17966,17973,17980,17987,17994,18001,18008,18015,18022,18029,18036,18043,18050,18057,18064,18071,18078,18085,18092,18099,18106,18113,18120,18127,18134,18141,18148,18155,18162,18169,18176,18183,18190,18197,18204,18211,18218,18225,18232,18239,18246,18253,18260],&#34;y&#34;:[0,0.508779931584957,1.66385404789053,3.09236031927023,0.464652223489148,-3.03660205245155,-1.79657924743445,-3.44857468643104,-3.55108323831245,-4.53238312428735,-6.06442417331815,-9.11288483466364,-9.00992018244017,-9.39954389965796,-9.9204104903079,-11.8960091220069,-11.9610034207526,-13.954503990878,-11.6064994298746,-12.5167616875713,-12.7992018244014,-12.9958950969213,-11.7361459521095,-14.1443557582668,-19.4618015963512,-17.9740022805017,-18.0534777651084,-15.6307867730901,-15.6258836944128,-12.1849486887115,-11.5216647662486,-11.0036488027366,-12.9387685290764,-11.4427594070696,-10.4251995438997,-13.3564424173318,-15.4714937286203,-15.8152793614596,-17.0259977194983,-19.290763968073,-20.1280501710376,-18.454732041049,-19.4489167616876,-18.5827822120867,-20.5379703534778,-19.2321550741163,-16.3035347776511,-15.9880273660205,-14.9251995438997,-14.2033067274801,-14.7125427594071,-14.8686431014823],&#34;text&#34;:[&#34;total.2018: 0.0000000
+colour: 2018
+Date: 2019-01-07&#34;,&#34;total.2018: 0.5087799
+colour: 2018
+Date: 2019-01-14&#34;,&#34;total.2018: 1.6638540
+colour: 2018
+Date: 2019-01-21&#34;,&#34;total.2018: 3.0923603
+colour: 2018
+Date: 2019-01-28&#34;,&#34;total.2018: 0.4646522
+colour: 2018
+Date: 2019-02-04&#34;,&#34;total.2018: -3.0366021
+colour: 2018
+Date: 2019-02-11&#34;,&#34;total.2018: -1.7965792
+colour: 2018
+Date: 2019-02-18&#34;,&#34;total.2018: -3.4485747
+colour: 2018
+Date: 2019-02-25&#34;,&#34;total.2018: -3.5510832
+colour: 2018
+Date: 2019-03-04&#34;,&#34;total.2018: -4.5323831
+colour: 2018
+Date: 2019-03-11&#34;,&#34;total.2018: -6.0644242
+colour: 2018
+Date: 2019-03-18&#34;,&#34;total.2018: -9.1128848
+colour: 2018
+Date: 2019-03-25&#34;,&#34;total.2018: -9.0099202</description>
     </item>
     
     <item>
@@ -27,15 +51,6 @@
       
       <guid>/2019/02/02/seasonality-trading-with-natgas/</guid>
       <description>With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>/project/project1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project1/</guid>
-      <description>Project 1code{white-space: pre;}pre:not([class]) {background-color: white;}if (window.hljs) {hljs.configure({languages: []});hljs.initHighlightingOnLoad();if (document.readyState &amp;&amp; document.readyState === &#34;complete&#34;) {window.setTimeout(function() { hljs.initHighlighting(); }, 0);}}h1 {font-size: 34px;}h1.title {font-size: 38px;}h2 {font-size: 30px;}h3 {font-size: 24px;}h4 {font-size: 18px;}h5 {font-size: 16px;}h6 {font-size: 12px;}.</description>
     </item>
     
   </channel>
