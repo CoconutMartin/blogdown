@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Seasonality trading with NatGas</title>
+        <style>
+
+    html body {
+        font-family: 'Mina', sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    :root {
+        --accent: #386890;
+        --border-width:  0 ;
+    }
+
+</style>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mina">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=VT323">
+
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/lakeside-light.min.css"> 
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+
+ 
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+    
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+
+<script>$(document).on('click', function() { $('.collapse').collapse('hide'); })</script>
+
+
+<script>
+$(document).ready(function(){
+    
+  var input = $('#night-mode-toggle');
+  var container = $('#bigbody');
+  var stat = $('#button-status');
+  
+  container.toggleClass(localStorage.toggled);
+  stat.bootstrapToggle(localStorage.button).change();
+  
+  input.on('click', function() {
+      if (localStorage.toggled != "-nightmode" ) {
+          container.toggleClass("-nightmode", true );
+          localStorage.toggled = "-nightmode";
+          localStorage.button = "on";
+       } else {
+          container.toggleClass("-nightmode", false );
+          localStorage.toggled = "";
+          localStorage.button = "off"
+       }
+  })
+});
+</script>
+ <meta name="generator" content="Hugo 0.54.0" />
+        
+        
+        
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133552770-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', 'UA-133552770-1');
+        </script>
+        
+
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/img/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/img/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    
+    
+    
+    <meta property="og:title" content="Seasonality trading with NatGas">
+    <meta property="og:type" content="article">
+      
+      <meta name="twitter:card" content="summary">
+      <meta name="twitter:image" content="/favicon/birdmath.png" >
+      
+    <meta property="description" content="">
+    <meta property="og:description" content="">
+    
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:site" content="">
+    
+    </head>
+
+    
+    
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    
+
+    <body id = "bigbody">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand visible-xs" href="#">Seasonality trading with NatGas</a>
+                    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    
+                        <ul class="nav navbar-nav">
+                            
+                                <li><a href="/">Home</a></li>
+                            
+                                <li><a href="/post/">Post</a></li>
+                            
+                                <li><a href="/project/">Projects</a></li>
+                            
+                                <li><a href="/tags/">Tags</a></li>
+                            
+                        </ul>
+                    
+                    
+                        <ul class="nav navbar-nav navbar-right">
+                            
+                                <li class="navbar-icon"><a href="mailto:emcmunsayac@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://twitter.com/coco_not_martin/"><i class="fa fa-twitter"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://www.linkedin.com/in/emcmunsayac/"><i class="fa fa-linkedin"></i></a></li>
+                            
+                            <li id="night-mode-toggle">
+    <input type="checkbox" id = "button-status"
+        data-toggle="toggle"
+        data-width = "10"
+        data-height = "1"
+        data-on="<i class='fa fa-moon-o fa-lg' style='vertical-align:25%'></i>"
+        data-off= "<i class='fa fa-sun-o fa-lg' style='vertical-align:25%'></i>"
+        data-style="ios"
+        data-onstyle = "default">
+</li>
+                        </ul>
+                    
+                </div>
+            </div>
+        </nav>
+
+
+<main>
+
+    <div class="item">
+
+    
+    
+    
+
+    
+    
+      
+    
+
+    <h4><a href="/2019/02/02/seasonality-trading-with-natgas/">Seasonality trading with NatGas</a></h4>
+    <h5>February 2, 2019 - 2 minutes</h5>
+    <h5></h5>
+
+    
+
+        <a href="/categories/backtesting">
+        <kbd class="item-cat"> backtesting </kbd>
+    </a>
+    
+    
+    <a href="/tags/r">
+        <kbd class="item-tag"> R </kbd>
+    </a>
+    
+
+</div>
+
+
+    <br> <div class="text-justify">
+
+
+<p>I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the “good” trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable, which will then be followed up by lower prices as demand normalizes during the non-winter season.</p>
+<p>What is pretty counter-intuitive though is that basing of NatGas’ monthly median returns, prices rally from end-Feb to end-April, eases down until end-July before heading up until end-October, out-of-synch with the US seasons. I might be missing something here.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<p>NatGas seems to exhibit a trend and seasonality after decomposiing the timeseries which could be tradable…</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
+<p>…but I’ll base the trading signal off the observed seasonality of median returns for now. Backtesting rules based on seasonality:</p>
+<p>Short: Feb, May-Jul, Nov</p>
+<p>Long: Mar-Apr, Aug-Oct, Dec-Jan</p>
+<p>*Positions are placed by month end.</p>
+<p>Looking at the backtest results, the long-short strategy have worked well in the past up until it started underperforming in mid-2012 where long-only began outperforming both long-short and short-only, and further decaying until end 2017. Short-side of the trade drove the performance decay that probably came from a demand shock (demand remained persistent despite warmer temperatures, lower warm temperatures).</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p>Meanwhile, long-only generated higher information ratio compared to long-short, with information ratio oscillating over time. The oscillation could be a function of sentiment or major events but this would need further research.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p>Rolling performance of all strategies vary from time to time but long-only has shown less volatile outperformance throughout the period.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
+<p>Looking at the overall strategy performances, long-short returns decayed significantly over time from 2006 until end 2016 possibly due to supply/demand shocks. On a rolling basis, long-short stated to pick up again but this is mostly from the long-side of the trade as the short-side still falls short of expectations.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p>Overall, implementing a long-only strategy based on identified strong periods have generated good returns relative to long-short and short-only strategies. However, returns are significantly volatile over the testing periods, suggesting more prudent position sizing is warranted.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
+</div>
+
+    
+    
+
+    
+
+    
+
+</main>
+
+        <footer id = "bigfooter">
+            <div style = "padding:15px;">
+                <p>Powered by <a href="https://gohugo.io">Hugo</a>. Themed by <a href="https://github.com/nathancday/min_night">min_night</a>.
+                </p>
+                <a rel="license" href="https://creativecommons.org/licenses/by/4.0/"
+                title="Creative Commons Attribution 4.0 International license">
+                <i class="fa fa-creative-commons" aria-hidden="true"></i> Attribution 4.0 International license
+                </a>
+            </div>
+        </footer>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133552770-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', 'UA-133552770-1');
+        </script>
+       
+    </body>
+
+</html>
+

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R on </title>
+    <link>/tags/r/</link>
+    <description>Recent content in R on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 02 Feb 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Seasonality trading with NatGas</title>
+      <link>/2019/02/02/seasonality-trading-with-natgas/</link>
+      <pubDate>Sat, 02 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/02/seasonality-trading-with-natgas/</guid>
+      <description>I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the “good” trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable, which will then be followed up by lower prices as demand normalizes during the non-winter season.</description>
+    </item>
+    
+  </channel>
+</rss>

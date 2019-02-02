@@ -1,0 +1,330 @@
+---
+title: Seasonality trading with NatGas
+author: Coconut Martin
+date: '2019-02-02'
+slug: seasonality-trading-with-natgas
+categories:
+  - backtesting
+tags:
+  - R
+---
+
+I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the "good" trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable,  which will then be followed up by lower prices as demand normalizes during the non-winter season.
+
+```{r, include=FALSE}
+library(tidyquant); library(jsonlite); library(timetk); library(forecast)
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, fig.width = 8)
+
+json_file <- 'https://datahub.io/core/natural-gas/datapackage.json'
+json_data <- fromJSON(paste(readLines(json_file), collapse=""))
+
+# get list of all resources:
+print(json_data$resources$name)
+
+# print all tabular data(if exists any)
+for(i in 1:length(json_data$resources$datahub$type)){
+  if(json_data$resources$datahub$type[i]=='derived/csv'){
+    path_to_file = json_data$resources$path[i]
+    data <- read.csv(url(path_to_file))
+    print(data)
+  }
+}
+
+theme_set(theme_tq() +
+  theme(panel.grid = element_blank()))
+```
+
+```{r}
+natgas.chg <- data %>% 
+  rename(natgas = Price) %>% 
+  mutate(
+    Date = paste0(Month, "-01") %>% ymd(),
+    mo = month.abb[month(Date)],
+    mo = factor(mo, levels = unique(mo)),
+    natgas.chg = natgas / lag(natgas) - 1
+    ) %>% 
+  na.omit()
+```
+
+What is pretty counter-intuitive though is that basing of NatGas' monthly median returns, prices rally from end-Feb to end-April, eases down until end-July before heading up until end-October, out-of-synch with the US seasons. I might be missing something here. 
+
+```{r, fig.width=8}
+natgas.chg %>% 
+  select(Date, mo, everything(), -Month) %>% 
+  mutate(
+    season = ifelse(month(Date) %in% c(1, 2, 12), "Winter",
+                    ifelse(month(Date) %in% c(3:5), "Spring",
+                           ifelse(month(Date) %in% c(6:8), "Summer", "Autumn")))
+  ) %>% 
+  ggplot(aes(mo, natgas.chg))+
+  geom_boxplot(aes(fill = season), width = 0.5, alpha = 0.3) +
+  geom_jitter(width = 0.1, show.legend = FALSE) +
+  geom_hline(yintercept = 0, color = "red") +
+  labs(title = "Median monthly returns appear to follow a seasonality pattern but not US seasons",
+       y = "Month-on-Month Change (%)",
+       x = "")
+```
+
+NatGas seems to exhibit a trend and seasonality after decomposiing the timeseries which could be tradable...
+
+```{r, fig.width=8}
+natgas.chg %>% 
+  tk_ts(select = natgas.chg,
+        start = c(1997, 2),
+        end = c(2018, 12),
+        freq = 12) %>% 
+  decompose() %>%
+  autoplot()
+```
+
+...but I'll base the trading signal off the observed seasonality of median returns for now. Backtesting rules based on seasonality:
+
+Short: Feb, May-Jul, Nov
+
+Long:  Mar-Apr, Aug-Oct, Dec-Jan 
+
+*Positions are placed by month end.
+
+```{r, warning=FALSE}
+long.months <-  c("Jan", "Mar", "Apr", "Aug", "Sep", "Oct", "Dec") #c("Aug", "Sep", "Oct", "Nov", "Dec", "Jan")  
+short.months <- c("Feb", "May", "Jun", "Jul", "Nov")
+
+signal.returns <- natgas.chg %>% 
+  select(Date, mo, natgas.chg) %>% 
+  mutate(
+    signal = ifelse(mo %in% long.months, 1,
+                    ifelse(mo %in% short.months, -1, 0)),
+    # Calculate total returns
+    signal.return = natgas.chg * signal,
+    total.return = cumprod(1+signal.return) - 1,
+    buy.hold = cumprod(1+natgas.chg) - 1,
+    # Calculate rolling annual returns
+    yearly.return = rollapplyr(1+signal.return, FUN = prod, width = 12, na.pad = TRUE) - 1,
+    yearly.buy.hold = rollapplyr(1+natgas.chg, FUN = prod, width = 12, na.pad = TRUE) - 1
+    )
+
+long.only <- natgas.chg %>% 
+  select(Date, mo, natgas.chg) %>% 
+  mutate(
+    signal = ifelse(mo %in% long.months, 1, 0),
+    # Calculate total returns
+    signal.return = natgas.chg * signal,
+    total.return = cumprod(1+signal.return) - 1,
+    buy.hold = cumprod(1+natgas.chg) - 1,
+    # Calculate rolling annual returns
+    yearly.return = rollapplyr(1+signal.return, FUN = prod, width = 12, na.pad = TRUE) - 1,
+    yearly.buy.hold = rollapplyr(1+natgas.chg, FUN = prod, width = 12, na.pad = TRUE) - 1
+    )
+
+short.only <- natgas.chg %>% 
+  select(Date, mo, natgas.chg) %>% 
+  mutate(
+    signal = ifelse(mo %in% short.months, -1, 0),
+    # Calculate total returns
+    signal.return = natgas.chg * signal,
+    total.return = cumprod(1+signal.return) - 1,
+    buy.hold = cumprod(1+natgas.chg) - 1,
+    # Calculate rolling annual returns
+    yearly.return = rollapplyr(1+signal.return, FUN = prod, width = 12, na.pad = TRUE) - 1,
+    yearly.buy.hold = rollapplyr(1+natgas.chg, FUN = prod, width = 12, na.pad = TRUE) - 1
+    )
+```
+
+Looking at the backtest results, the long-short strategy have worked well in the past up until it started underperforming in mid-2012 where long-only began outperforming both long-short and short-only, and further decaying until end 2017. Short-side of the trade drove the performance decay that probably came from a demand shock (demand remained persistent despite warmer temperatures, lower warm temperatures). 
+
+```{r, warning=FALSE, fig.width=8}
+premium <- data.frame(
+  signal.returns %>% rename(long.short = total.return) %>% select(Date, buy.hold, long.short),
+  long.only %>% rename(long.only = total.return) %>% select(long.only),
+  short.only %>% rename(short.only = total.return) %>% select(short.only)
+  ) %>% 
+  gather(key, value, -c(Date, buy.hold)) %>% 
+  mutate(sprd = value - buy.hold,
+         sd.rolling = rollapplyr(sprd, FUN = sd, width = 12, na.pad = TRUE, na.rm = TRUE),
+         info.ratio = sprd / sd.rolling)
+
+premium %>% 
+  ggplot(aes(Date, sprd * 100, color = key)) +
+  geom_rect(aes(xmin = ymd("2005-03-01"), xmax = ymd("2006-01-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Global Financial Crisis
+  geom_rect(aes(xmin = ymd("2007-06-01"), xmax = ymd("2009-03-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Testing period
+  geom_rect(aes(xmin = ymd("2017-01-01"), xmax = ymd("2019-12-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "#FFDAB9") +
+  geom_line(size = 0.75) +
+  annotate("text", x = ymd("2005-07-01"), y = 500, label = "Ukraine-Russia gas dispute", angle = 90) +
+  annotate("text", x = ymd("2008-05-01"), y = 500, label = "Global Financial Crisis", angle = 90) +
+  annotate("text", x = ymd("2018-06-01"), y = 500, label = "Testing period", angle = 90) +
+  labs(title = "Strategy outperformance relative to buy-and-hold", 
+       y = "Spread in percentage points",
+       x = "") +
+  scale_x_date(date_breaks = "1 years", date_labels = "%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+Meanwhile, long-only generated higher information ratio compared to long-short, with information ratio oscillating over time. The oscillation could be a function of sentiment or major events but this would need further research.
+
+```{r, fig.width = 8, fig.height = 8, warning=FALSE}
+premium.dist <- premium %>% ggplot(aes(info.ratio, fill = key), alpha = 0.25) + geom_histogram(bins = 29, show.legend = FALSE) + labs(x = "")
+premium.ts <- premium %>% 
+  ggplot(aes(Date, info.ratio, color = key)) + 
+  geom_rect(aes(xmin = ymd("2005-03-01"), xmax = ymd("2006-01-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Global Financial Crisis
+  geom_rect(aes(xmin = ymd("2007-06-01"), xmax = ymd("2009-03-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Testing period
+  geom_rect(aes(xmin = ymd("2017-01-01"), xmax = ymd("2019-12-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "#FFDAB9") +
+  geom_line(size = 0.75) +
+  annotate("text", x = ymd("2005-07-01"), y = 5, label = "Ukraine-Russia gas dispute", angle = 90) +
+  annotate("text", x = ymd("2008-05-01"), y = 5, label = "Global Financial Crisis", angle = 90) +
+  annotate("text", x = ymd("2018-06-01"), y = 5, label = "Testing period", angle = 90) +
+  labs(y = "Information ratio",
+       x = "")
+
+gridExtra::grid.arrange(
+  premium.dist, premium.ts, 
+  top = "Distribution and Temporal Information Ratio"
+  )
+```
+
+Rolling performance of all strategies vary from time to time but long-only has shown less volatile outperformance throughout the period.
+
+```{r, warning=FALSE, fig.width=8}
+data.frame(
+  signal.returns %>% rename(long.short = yearly.return) %>% select(Date, yearly.buy.hold, long.short),
+  long.only %>% rename(long.only = yearly.return) %>% select(long.only),
+  short.only %>% rename(short.only = yearly.return) %>% select(short.only)
+  ) %>% 
+  gather(key, value, -c(Date, yearly.buy.hold)) %>% 
+  mutate(sprd = value - yearly.buy.hold) %>% 
+  ggplot(aes(Date, sprd * 100, color = key)) +
+  geom_rect(aes(xmin = ymd("2005-03-01"), xmax = ymd("2006-01-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Global Financial Crisis
+  geom_rect(aes(xmin = ymd("2007-06-01"), xmax = ymd("2009-03-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Testing period
+  geom_rect(aes(xmin = ymd("2017-01-01"), xmax = ymd("2019-12-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "#FFDAB9") +
+  geom_line(size = 0.75) +
+  annotate("text", x = ymd("2005-07-01"), y = 0, label = "Ukraine-Russia gas dispute", angle = 90) +
+  annotate("text", x = ymd("2008-05-01"), y = 0, label = "Global Financial Crisis", angle = 90) +
+  annotate("text", x = ymd("2018-06-01"), y = 0, label = "Testing period", angle = 90) +
+  labs(title = "Rolling period strategy outperformance relative to buy-and-hold", 
+       y = "Spread in percentage points",
+       x = "") +
+  scale_x_date(date_breaks = "1 years", date_labels = "%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+Looking at the overall strategy performances, long-short returns decayed significantly over time from 2006 until end 2016 possibly due to supply/demand shocks. On a rolling basis, long-short stated to pick up again but this is mostly from the long-side of the trade as the short-side still falls short of expectations. 
+
+```{r, warning=FALSE, fig.width=8}
+data.frame(
+  signal.returns %>% rename(long.short = total.return, x.buyhold = buy.hold) %>% select(Date, x.buyhold, long.short),
+  long.only %>% rename(long.only = total.return) %>% select(long.only),
+  short.only %>% rename(short.only = total.return) %>% select(short.only)
+  ) %>% 
+  gather(key, value, -Date) %>% 
+  ggplot(aes(Date, value * 100, color = key)) +
+  geom_rect(aes(xmin = ymd("2005-03-01"), xmax = ymd("2006-01-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Global Financial Crisis
+  geom_rect(aes(xmin = ymd("2007-06-01"), xmax = ymd("2009-03-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Testing period
+  geom_rect(aes(xmin = ymd("2017-01-01"), xmax = ymd("2019-12-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "#FFDAB9") +
+  geom_line(size = 0.75) +
+  annotate("text", x = ymd("2005-07-01"), y = 800, label = "Ukraine-Russia gas dispute", angle = 90) +
+  annotate("text", x = ymd("2008-05-01"), y = 800, label = "Global Financial Crisis", angle = 90) +
+  annotate("text", x = ymd("2018-06-01"), y = 800, label = "Testing period", angle = 90) +
+  labs(title = "Strategy total performance relative to buy-and-hold", 
+       y = "Total returns (%)",
+       x = "") +
+  scale_x_date(date_breaks = "1 years", date_labels = "%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+```{r, warning=FALSE, fig.width=8}
+data.frame(
+  signal.returns %>% rename(long.short = yearly.return, x.buyhold = yearly.buy.hold) %>% select(Date, x.buyhold, long.short),
+  long.only %>% rename(long.only = yearly.return) %>% select(long.only),
+  short.only %>% rename(short.only = yearly.return) %>% select(short.only)
+  ) %>% 
+  gather(key, value, -Date) %>% 
+  ggplot(aes(Date, value * 100, color = key)) +
+  geom_rect(aes(xmin = ymd("2005-03-01"), xmax = ymd("2006-01-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Global Financial Crisis
+  geom_rect(aes(xmin = ymd("2007-06-01"), xmax = ymd("2009-03-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "grey90") +
+  # Testing period
+  geom_rect(aes(xmin = ymd("2017-01-01"), xmax = ymd("2019-12-01"),
+                ymin = -Inf, ymax = Inf),
+            color = NA,
+            fill = "#FFDAB9") +
+  geom_line(size = 0.75) +
+  annotate("text", x = ymd("2005-07-01"), y = 100, label = "Ukraine-Russia gas dispute", angle = 90) +
+  annotate("text", x = ymd("2008-05-01"), y = 100, label = "Global Financial Crisis", angle = 90) +
+  annotate("text", x = ymd("2018-06-01"), y = 100, label = "Testing period", angle = 90) +
+  labs(title = "Rolling strategy performance relative to buy-and-hold", 
+       y = "Total returns (%)",
+       x = "") +
+  scale_x_date(date_breaks = "1 years", date_labels = "%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+Overall, implementing a long-only strategy based on identified strong periods have generated good returns relative to long-short and short-only strategies. However, returns are significantly volatile over the testing periods, suggesting more prudent position sizing is warranted. 
+
+```{r, fig.width = 8}
+bind_rows(signal.returns %>% slice(which.max(Date)) %>% select(Date, total.return, buy.hold, yearly.return, yearly.buy.hold),
+          long.only %>% slice(which.max(Date)) %>% select(Date, total.return, buy.hold, yearly.return, yearly.buy.hold),
+          short.only %>% slice(which.max(Date)) %>% select(Date, total.return, buy.hold, yearly.return, yearly.buy.hold)
+          ) %>% 
+  mutate(
+    strat.name = c("long.short", "long.only", "short.only")
+  ) %>% 
+  gather(key, value, -c(Date, strat.name)) %>% 
+  ggplot(aes(key, value * 100)) +
+  geom_col() +
+  labs(title = "Long-only strategy outperformed in all aspects", 
+       y = "Returns (%)",
+       x = "") +
+  facet_wrap(~strat.name) +
+  scale_y_continuous(breaks = seq(-200, 500, by = 50)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
