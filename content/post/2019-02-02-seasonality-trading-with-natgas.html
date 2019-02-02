@@ -11,24 +11,24 @@ tags:
 
 
 
-<p>With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns but I haven’t really done any work to test if those patterns held up consistently in the past so I might just be remembering the “good” trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable, which will then be followed up by lower prices as demand normalizes during the non-winter season.</p>
-<p>What is pretty counter intuitive though is that based on NatGas’ monthly median returns, prices rally from end-Feb to end-April, eases down until end-July before heading up until end-October, out-of-synch with the seasons in the US so I might be missing something here.</p>
+<p>With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.</p>
+<p>However, NatGas prices does not seem to follow this concept strictly based on its monthly median returns. Prices rally from March to April, eases down until July before heading up again until October. This is completely out-of-synch of US seasons and even violating the demand seasonality during the winter season so I might be missing something here.</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
-<p>NatGas seems to exhibit a trend and seasonality after decomposiing the timeseries which could be tradable…</p>
+<p>Decomposing NatGas returns yields its trend and seasonal patterns that could be tradable…</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
-<p>…but I’ll base the trading signal off the observed seasonality of median returns for now. Positions are placed by the start of the month. Backtesting rules based on seasonality:</p>
+<p>…but I will base the trading signal off the observed seasonality of median returns for now, with positions placed by the start of the month. Backtesting rules based on seasonality:</p>
 <p>Short: Feb, May-Jul, Nov (could NatGas’ rally until end-Nov18 be an outlier?)</p>
 <p>Long: Mar-Apr, Aug-Oct, Dec-Jan</p>
-<p>Looking at the backtest results, the long-short strategy have worked well in the past up until it started underperforming in mid-2012 where long-only began outperforming both long-short and short-only, and further decaying until end 2017. Short-side of the trade drove the performance decay that probably came from a supply/demand shock (supply disruption, persistent demand despite warmer temperatures, lower warm temperatures).</p>
+<p>Backtest results show the long-short strategy worked well in the past up until it started underperforming by mid-2012 and decaying further until end 2017. Short-side of the trade drove the performance decay that probably came from a supply/demand shock (supply disruption, persistent demand despite warmer temperatures, lower warm temperatures).</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
-<p>Meanwhile, long-only generated higher information ratio compared to long-short, with information ratio oscillating over time. The oscillation could be a function of sentiment or major events but this would need further research.</p>
+<p>Meanwhile, the long-only strategy generated higher information ratio compared to long-short, along with oscillations over time. The oscillations could be a function of sentiment or major events that drove market volatility but this would need further research before saying something definitively.</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
 <p>Rolling performance of all strategies vary from time to time but long-only has shown less volatile outperformance throughout the period.</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
-<p>Looking at the overall strategy performances, long-short returns decayed significantly over time from 2006 until end 2016 possibly due to supply/demand shocks. On a rolling basis, long-short stated to pick up again but this is mostly from the long-side of the trade as the short-side still falls short of expectations.</p>
+<p>Looking at the overall strategy performances, long-short returns decayed significantly over time from 2006 until end 2016 possibly due to supply/demand shocks. On a rolling basis, long-short stated picking up again but this is mostly from the long-side of the trade as the short-side still falls short of expectations.</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
-<p>I ran a logistic regression using a bayesian glm to check if months and season are statistically significant. Turns out it they are not statistically significant given the high Pr(&gt;|z|) values that the model spits out. Testing out the model predictions manage to yield decent results (61% accuracy) despite the insignificant Pr(&gt;|z|) values.</p>
+<p>I ran a logistic regression using a bayesian glm to check if months and season are statistically significant. Turns out they are not, given the high Pr(&gt;|z|) values that the model spits out. Testing out the model predictions manage to yield decent results (61% accuracy) despite the insignificant Pr(&gt;|z|) values.</p>
 <pre><code>## 
 ## Call:
 ## NULL
@@ -88,7 +88,7 @@ tags:
 ##                                           
 ##        &#39;Positive&#39; Class : down            
 ## </code></pre>
-<p>The model was also able to generate a decent equity curve except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season).</p>
+<p>The model was also able to generate a decent equity curves except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season).</p>
 <p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-12-1.png" width="768" /></p>
 <p>As far as 2019 is concerned, the Bayesian GLM model is correct in its prediction for January, while the rest remains to be seen. The model deserves further research despite its flaws given its potential as seen in its equity curves during backtesting, coupled with decent accuracy (61%).</p>
 <pre><code>##          Date  mo season glm.pred
