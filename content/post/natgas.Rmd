@@ -7,7 +7,7 @@ categories: []
 tags: []
 ---
 
-I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the "good" trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable,  which will then be followed up by lower prices as demand normalizes during the non-winter season. 
+I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the "good" trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable,  which will then be followed up by lower prices as demand normalizes during the non-winter season.
 
 ```{r, include=FALSE}
 library(tidyquant); library(jsonlite); library(timetk); library(forecast)
