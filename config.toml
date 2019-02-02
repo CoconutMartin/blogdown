@@ -1,6 +1,6 @@
 baseURL = "https://birdmath.netlify.com/"
 languageCode = "en-us"
-title = ""
+title = "Bird Math"
 description = "Past performance could be an indication of the future"
 theme = "min_night"
 disqusShortname = ""
