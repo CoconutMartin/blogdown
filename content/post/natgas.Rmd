@@ -2,9 +2,9 @@
 title: Seasonality trading with NatGas
 author: Coconut Martin
 date: '2019-02-02'
-slug: commodity
-categories: [commodity]
-tags: [backtest]
+slug: test-post
+categories: []
+tags: []
 ---
 
 I have seen some seasonality patterns in NatGas that seemed to generate decent profits with the benefit of hindsight. However, I have never really done any work to test if they were held up consistently in the past so might jsut be remembering the "good" trades. Intuitively, NatGas rallying during the fourth quarter as demand perks up due to winter season is understandable,  which will then be followed up by lower prices as demand normalizes during the non-winter season. 
