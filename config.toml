@@ -4,7 +4,7 @@ title = ""
 description = "This is where we try to model finance-related things with R."
 theme = "min_night"
 disqusShortname = ""
-googleAnalytics = "UA-133552770-1"
+googleAnalytics = ""
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 
 [permalinks]
