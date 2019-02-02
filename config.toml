@@ -2,7 +2,7 @@ baseURL = "https://birdmath.netlify.com/"
 languageCode = "en-us"
 title = ""
 description = "Past performance could be an indication of the future"
-theme = "aether"
+theme = "m10c"
 disqusShortname = ""
 googleAnalytics = "UA-133552770-1"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
@@ -11,7 +11,6 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     post = "/:year/:month/:day/:slug/"
 
 [params]
-    brand = "Bird Math"
     description = "Past performance could be an indication of the future"
     logo = "favicon/birdmath.png"
     #twitterAuthor = "@natedayta"
