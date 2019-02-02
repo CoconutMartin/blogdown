@@ -1,7 +1,7 @@
 baseURL = "/"
 languageCode = "en-us"
 title = ""
-description = "This is where we try to model finance-related things with R."
+description = "Past performance could be an indication of the future"
 theme = "min_night"
 disqusShortname = ""
 googleAnalytics = "UA-133552770-1"
@@ -12,7 +12,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 
 [params]
     author = "Nate Day"
-    description = "This is where we try to model finance-related things with R."
+    description = "Past performance could be an indication of the future"
     logo = "favicon/birdmath.png"
     #twitterAuthor = "@natedayta"
     #githubUsername = "nathancday"
@@ -21,7 +21,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     font = "Mina" # should match the name on Google Fonts!
     highlight = true
     highlightStyle = "lakeside-light" # make this match accent
-    highlightLanguages = ["r", "bash", "go"]
+    highlightLanguages = ["r"]
 
 # adjust these as you see fit
 [[menu.main]]
