@@ -77,13 +77,11 @@ natgas.chg %>%
   autoplot()
 ```
 
-...but I'll base the trading signal off the observed seasonality of median returns for now. Backtesting rules based on seasonality:
+...but I'll base the trading signal off the observed seasonality of median returns for now. Positions are placed by the start of the month. Backtesting rules based on seasonality:
 
-Short: Feb, May-Jul, Nov (could NatGas's rally until end-Nov18 might be an outlier?)
+Short: Feb, May-Jul, Nov (could NatGas' rally until end-Nov18 be an outlier?)
 
 Long:  Mar-Apr, Aug-Oct, Dec-Jan 
-
-*Positions are placed by month end.
 
 ```{r, warning=FALSE}
 long.months <-  c("Jan", "Mar", "Apr", "Aug", "Sep", "Oct", "Dec")
@@ -307,7 +305,7 @@ data.frame(
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 ```
 
-Feeding the "seasonal" hypothesis, we quickly build a bayesian logistic regression to see if this pattern is statistically significant. Turns out it is not given the insignificant Pr(>|z|) values that the model spits out. I'll tests the trading signals derived from the model just to check how it would have performed historically. 
+I ran a logistic regression using a bayesian glm to check if months and season are statistically significant. Turns out it they are not statistically significant given the high Pr(>|z|) values that the model spits out. Testing out the model predictions manage to yield decent results (61% accuracy) despite the insignificant Pr(>|z|) values.
 
 ```{r, warning=TRUE}
 natgas.train <- natgas.chg %>% filter(year(Date) < 2017)
@@ -332,15 +330,10 @@ natgas.model <- train(m.ret ~ mo + season,
 natgas.signal <- data.frame(glm.pred = predict(natgas.model, natgas.chg))
 
 summary(natgas.model)
-```
-
-The model was still able to generate decent accuracy despite the insignificant Pr(>|z|) values.
-
-```{r}
 confusionMatrix(natgas.chg$m.ret, natgas.signal$glm.pred)
 ```
 
-The models were still able to generate a decent equity curve except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season). 
+The model was also able to generate a decent equity curve except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season). 
 
 ```{r, fig.width=8, fig.height=8, warning=FALSE}
 natgas.train$glm.pred <- predict(natgas.model, natgas.train)
@@ -389,7 +382,7 @@ bind_rows(natgas.train, natgas.test) %>%
   facet_wrap(~key2, scales = "free", nrow = 2)
 ```
 
-To date, the Bayesian GLM model is correct in its predictions as far as January 2019 is concerned. Despite its flaws, the model deserves further research given its potential as seen in its equity curve during backtesting before completely shelving it off. 
+As far as 2019 is concerned, the Bayesian GLM model is correct in its prediction for January, while the rest remains to be seen. The model deserves further research despite its flaws given its potential as seen in its equity curves during backtesting, coupled with decent accuracy (61%). 
 
 ```{r}
 pred.2019 <- natgas.test %>% 
@@ -399,9 +392,7 @@ pred.2019 <- natgas.test %>%
 
 pred.2019$glm.pred <- predict(natgas.model, pred.2019)
 
-pred.2019 %>% 
-  knitr::kable() %>% 
-  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
+pred.2019
 ```
 
 Overall, implementing a long-only strategy based on identified strong periods have generated good returns relative to long-short and short-only strategies. However, returns are significantly volatile over the testing periods, suggesting more prudent position sizing is warranted. 
