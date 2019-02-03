@@ -13,7 +13,7 @@ weight: 0
 ---
 
 ```{r, include=FALSE}
-library(tidyquant)
+library(tidyquant); library(plotly)
 knitr::opts_chunk$set(echo=FALSE, message=FALSE)
 x <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date))
 ```
@@ -28,7 +28,7 @@ filler_label <- paste0(as.character(previous_year - years_cutoff - 1), "-", as.c
 
 ticker <- c("PSEI")
 
-wkly <- x %>% 
+wkly.10yrs <- x %>% 
   select(Date, ticker) %>% 
   tq_transmute(mutate_fun = to.period,
                period = "week") %>% 
@@ -41,8 +41,29 @@ wkly <- x %>%
   mutate(chg = cumprod(1 + clean(ROC(value, n = 1, type = "discrete"))) - 1) %>% 
   group_by(mon, wk, key) %>% 
   summarise(bottom = min(chg, na.rm = TRUE) * 100,
-            top = max(chg, na.rm = TRUE) * 100) %>% 
+            top = max(chg, na.rm = TRUE) * 100,
+            mid = mean(chg, na.rm = TRUE) * 100,
+            sd.plus1 = mid + (sd(chg, na.rm = TRUE) * 100),
+            sd.minus1 = mid - (sd(chg, na.rm = TRUE) * 100),
+            sd.plus2 = mid + (sd(chg, na.rm = TRUE) * 200),
+            sd.minus2 = mid - (sd(chg, na.rm = TRUE) * 200)) %>% 
   arrange(wk)
+
+
+wkly.5yrs <- x %>% 
+  select(Date, ticker) %>% 
+  tq_transmute(mutate_fun = to.period,
+               period = "week") %>% 
+  mutate(yr = year(Date),
+         mon = month.abb[month(Date)],
+         wk = week(Date)) %>% 
+  filter(yr <= previous_year & yr >= (previous_year - (years_cutoff/2))) %>% 
+  gather(key, value, -c(Date, yr, mon, wk)) %>% 
+  group_by(yr, key) %>% 
+  mutate(chg = cumprod(1 + clean(ROC(value, n = 1, type = "discrete"))) - 1) %>% 
+  group_by(mon, wk, key) %>%
+  summarise(bottom.5yrs = min(chg, na.rm = TRUE) * 100,
+            top.5yrs = max(chg, na.rm = TRUE) * 100)
 ```
 
 ```{r, fig.width=6, message=FALSE}
@@ -73,26 +94,46 @@ tw19 <- x %>%
   mutate(total.2019 = (cumprod(1 + clean(ROC(value, n = 1, type = "discrete"))) - 1) * 100) %>% 
   ungroup() %>% 
   select(mon, wk, total.2019, key)
+```
 
-plt <- tw18 %>% 
+```{r}
+plt.data <- tw18 %>% 
   left_join(., tw19) %>% 
-  left_join(., wkly) %>% 
-  mutate(Date = as.Date(paste(2019, wk, 1, sep = "-"), "%Y-%U-%u")) %>% 
-  ggplot(aes(x = Date)) +
-  geom_line(aes(y = total.2018, color = "2018"), linetype = "dashed") +
-  geom_line(aes(y = total.2019, color = "2019"), size = 1.1) +
-  geom_line(aes(y = 0), color = "grey20", linetype = "dotted") +
-  geom_ribbon(aes(ymin = bottom, ymax = top), fill = "red", alpha = 0.10) +
-  labs(title = paste0(ticker, " Historical Range from ", previous_year - years_cutoff, " to ", previous_year),
-       x = "",
-       y = "Returns [%]") +
-  theme_tq() + 
-  scale_color_manual(values = c("grey20", "#C00000"), name = "Year") +
-  scale_x_date(date_labels = "%b", date_breaks = "2 month") +
-  theme(panel.grid = element_blank()) +
-  facet_wrap(~key, scales = "free")
+  left_join(., wkly.5yrs) %>% 
+  left_join(., wkly.10yrs) %>% 
+  mutate(Date = as.Date(paste(2019, wk, 1, sep = "-"), "%Y-%U-%u"))
 
-plotly::ggplotly(plt) %>% 
-  plotly::layout(title = paste0(ticker, " Historical Range from ", previous_year - years_cutoff, " to ", previous_year))
+plt.data %>% 
+  group_by(key) %>% 
+  do(
+  plt = plot_ly(data = ., x = ~Date) %>% 
+  add_ribbons(ymin = ~bottom, ymax = ~top, name = "Historical Min/Max",
+              fillcolor = "#ffeda0", 
+              line = list(color = "transparent", width = 0)) %>% 
+  add_ribbons(ymin = ~bottom.5yrs, ymax = ~top.5yrs, name = "5-Year Min/Max",
+              fillcolor = "#feb24c", 
+              line = list(color = "transparent", width = 0)) %>% 
+  add_lines(y = 0, name = "", line = list(color = "grey", width = 0.5), showlegend = FALSE) %>% 
+  add_lines(y = ~mid, name = "Mid-point", line = list(color = "blue", dash = "dot", width = 1)) %>% 
+  add_lines(y = ~total.2018, name = "2018", line = list(color = "black", dash = "dot")) %>% 
+  add_lines(y = ~total.2019, name = "2019", line = list(color = "#C00000", width = 4)) %>% 
+  layout(title = paste0("<b>", ticker, " Historical Range from ", 
+                        previous_year - years_cutoff, " to ", previous_year, "</b>"),
+         titlefont = list(color = "#C00000", 
+                          family = "arial"),
+         yaxis = list(title = "Returns (%)", 
+                      family = "arial",
+                      showgrid = FALSE),
+         xaxis = list(title = "",
+                      tickformat = "%b",
+                      dtick = "M1",
+                      family = "arial",
+                      showgrid = FALSE),
+         legend = list(orientation = "h", 
+                       family = "arial",
+                       bgcolor = "transparent",
+                       x = 0.05, y = 1))
+  ) %>% 
+  subplot(nrows = length(ticker), shareY = TRUE)
 ```
 
