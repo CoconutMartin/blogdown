@@ -107,7 +107,7 @@ plt.data %>%
   group_by(key) %>% 
   do(
   plt = plot_ly(data = ., x = ~Date) %>% 
-  add_ribbons(ymin = ~bottom, ymax = ~top, name = "Historical Min/Max",
+  add_ribbons(ymin = ~bottom, ymax = ~top, name = "10-Year Min/Max",
               fillcolor = "#ffeda0", 
               line = list(color = "transparent", width = 0)) %>% 
   add_ribbons(ymin = ~bottom.5yrs, ymax = ~top.5yrs, name = "5-Year Min/Max",
@@ -129,10 +129,10 @@ plt.data %>%
                       dtick = "M1",
                       family = "arial",
                       showgrid = FALSE),
-         legend = list(orientation = "h", 
+         legend = list(orientation = "v", 
                        family = "arial",
                        bgcolor = "transparent",
-                       x = 0.05, y = 1))
+                       x = 0.05, y = 0.97))
   ) %>% 
   subplot(nrows = length(ticker), shareY = TRUE)
 ```
