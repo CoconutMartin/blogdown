@@ -96,7 +96,7 @@ tw19 <- x %>%
   select(mon, wk, total.2019, key)
 ```
 
-```{r}
+```{r, fig.height=9}
 plt.data <- tw18 %>% 
   left_join(., tw19) %>% 
   left_join(., wkly.5yrs) %>% 
