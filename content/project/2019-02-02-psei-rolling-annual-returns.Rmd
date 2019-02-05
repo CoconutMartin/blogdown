@@ -1,0 +1,61 @@
+---
+title: PSEI Rolling Annual Returns
+author: Coconut Martin
+date: '2019-02-05'
+slug: PSEI-rolling-annual-returns
+categories:
+  - charting
+tags:
+  - R
+description: ''
+repo: ''
+weight: 0
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE)
+options(digits = 2, scipen = 999)
+
+library(tidyquant); library(plotly)
+
+theme_set(theme_tq() +
+            theme(panel.grid = element_blank()))
+
+x <- read.csv("all shares px.csv") %>% mutate(Date = dmy(Date))
+```
+
+```{r}
+ticker <- c("PSEI")
+
+x.returns <- x %>% 
+  tq_transmute(
+    select = ticker,
+    mutate_fun = to.period,
+    period = "days"
+  ) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    period.return = ROC(value, n = 1, type = "discrete", na.pad = TRUE),
+    rolling.period.return = (rollapplyr(1 + period.return, FUN = prod, width = 252*1, na.rm = TRUE, na.pad = TRUE) - 1) * 100
+  ) %>% 
+  na.omit()
+
+x.returns %>% 
+  plot_ly(x = ~Date, y = ~rolling.period.return, color = ~key, name = ~key, colors = "#C00000") %>% 
+  add_lines() %>% 
+  layout(title = ~paste0("<b>", ticker, " Rolling Annual Returns (Daily Interval) </b>"),
+         titlefont = list(color = "#C00000",
+                          family = "arial"),
+         xaxis = list(title = "",
+                      family = "arial",
+                      tickformat = "%Y",
+                      dtick = "M12",
+                      tickangle = 90,
+                      showgrid = FALSE),
+         yaxis = list(title = "Rolling Returns (%)",
+                      showgrid = FALSE)
+         )
+```
+
+

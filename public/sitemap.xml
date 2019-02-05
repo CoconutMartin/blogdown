@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/project/psei-rolling-annual-returns/</loc>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/project/psei-trading-range/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
   </url>
@@ -20,7 +25,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -32,7 +37,7 @@
   
   <url>
     <loc>/categories/charting/</loc>
-    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -44,19 +49,19 @@
   
   <url>
     <loc>/project/</loc>
-    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2019-02-02T00:00:00+00:00</lastmod>
+    <lastmod>2019-02-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
