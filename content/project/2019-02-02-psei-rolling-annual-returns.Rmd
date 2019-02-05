@@ -54,6 +54,7 @@ x.returns %>%
                       tickangle = 90,
                       showgrid = FALSE),
          yaxis = list(title = "Rolling Returns (%)",
+                      dtick = 25,
                       showgrid = FALSE)
          )
 ```
