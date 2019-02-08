@@ -1,27 +1,27 @@
-baseURL = "/"
+baseURL = "https://birdmath.netlify.com/"
 languageCode = "en-us"
-title = "min_night"
-description = "An easy reading Hugo blog with night-mode."
+title = "Bird Math"
+description = "Past performance could be an indication of the future"
 theme = "min_night"
 disqusShortname = ""
-googleAnalytics = ""
+googleAnalytics = "UA-133552770-1"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"
 
 [params]
-    author = "Nate Day"
-    description = "An easy reading Hugo blog with night-mode."
-    logo = "favicon/android-chrome-192x192.png"
-    twitterAuthor = "@natedayta"
-    githubUsername = "nathancday"
+    author = "Emille Martin Munsayac II"
+    description = "Past performance could be an indication of the future"
+    logo = "favicon/birdmath.png"
+    #twitterAuthor = "@natedayta"
+    #githubUsername = "nathancday"
     accent = "#386890" # dark colors do best
     backgroundColor = "#f5f5f5"
     font = "Mina" # should match the name on Google Fonts!
     highlight = true
     highlightStyle = "lakeside-light" # make this match accent
-    highlightLanguages = ["r", "bash", "go"]
+    highlightLanguages = ["r"]
 
 # adjust these as you see fit
 [[menu.main]]
@@ -49,26 +49,16 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 # The list of available icons can be found at http://fontawesome.io/icons/
 
 [[menu.icon]]
-    url = "mailto:nathancday@gmail.com"
+    url = "mailto:emcmunsayac@gmail.com"
     name = "envelope-o"
     weight = 1
 
 [[menu.icon]]
-    url = "https://github.com/NathanCDay"
-    name = "github"
-    weight = 2
-
-[[menu.icon]]
-    url = "https://twitter.com/natedayta/"
+    url = "https://twitter.com/coco_not_martin/"
     name = "twitter"
     weight = 3
 
 [[menu.icon]]
-    url = "https://www.linkedin.com/in/nathan-day-59b48435/"
+    url = "https://www.linkedin.com/in/emcmunsayac/"
     name = "linkedin"
     weight = 4
-
-[[menu.icon]]
-    url = "https://www.stackoverflow.com/users/5878751/nate"
-    name = "stack-overflow"
-    weight = 5

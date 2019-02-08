@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en-US" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+<head>
+    <meta charset="utf-8" />
+<meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="description" content="">
+<meta property="og:description" content="" />
+<meta name="author" content="map[]" />
+
+<meta property="og:title" content="Seasonality trading with NatGas" />
+<meta property="twitter:title" content="Seasonality trading with NatGas" />
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/images/favicons/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/images/favicons/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/images/favicons/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/images/favicons/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/images/favicons/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/images/favicons/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/images/favicons/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/images/favicons/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/images/favicons/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/images/favicons/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png">
+	<link rel="manifest" href="/images/favicons/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/images/favicons/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
+    
+
+    <base href="/">
+    <title>Seasonality trading with NatGas</title>
+    <link rel="canonical" href="/post/seasonality-trading-with-natgas/">
+    
+
+    
+<link rel="stylesheet" href="/css/style.min.css">
+</head>
+<body lang="en">
+<div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="//" class="site-avatar"><img src="/images/hugo.png" /></a>
+
+      <div class="site-info">
+        <h1 class="site-name"><a href="//">My New Hugo Site</a></h1>
+        <p class="site-description">Hugo port of Jekyll Now</p>
+      </div>
+
+      <nav>
+        <a href="/">Blog</a>
+        <a href="/project">Projects</a>
+        <a href="/dashboard/blog">Dashboard</a>
+      </nav>
+    </header>
+  </div>
+</div>
+<div class="container">
+  <section class="section">
+    <div class="container">
+      <article class="article">
+        
+<h1 class="title"><a href="/post/seasonality-trading-with-natgas/">Seasonality trading with NatGas</a></h1>
+<div class="post-metadata">
+    
+    <p class="text-muted"></p>
+    
+        <div class="tags text-muted">
+	<i class="fa fa-tags" aria-hidden="true"></i>
+    
+        
+        <a class="button is-link code" href="/tags/r">R</a>
+    
+</div>
+    
+    <p class="text-muted"><i class="fa fa-calendar" aria-hidden="true"></i> February 2, 2019</p>
+</div>
+        <div class="content">
+          <div class="well post-banner">
+    
+</div>
+           
+
+
+
+
+
+
+
+          
+          
+
+
+<p>With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.</p>
+<p>However, NatGas prices does not seem to follow this concept strictly based on its monthly median returns. Prices rally from March to April, eases down until July before heading up again until October. This is completely out-of-synch of US seasons and even violating the demand seasonality during the winter season so I might be missing something here.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<p>Decomposing NatGas returns yields its trend and seasonal patterns that could be tradable…</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
+<p>…but I will base the trading signal off the observed seasonality of median returns for now, with positions placed by the start of the month. Backtesting rules based on seasonality:</p>
+<p>Short: Feb, May-Jul, Nov (could have NatGas’ rally until end-Nov18 be an outlier?)</p>
+<p>Long: Mar-Apr, Aug-Oct, Dec-Jan</p>
+<p>Backtest results show the long-short strategy worked well in the past up until it started underperforming by mid-2012 and decaying further until end 2017. Short-side of the trade drove the performance decay that probably came from a supply/demand shock (supply disruption, persistent demand despite warmer temperatures, lower warm temperatures).</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p>Meanwhile, the long-only strategy generated higher information ratio compared to long-short, along with oscillations over time. The oscillations could be a function of sentiment or major events that drove market volatility but this would need further research before saying something definitively.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p>Rolling performance of all strategies vary from time to time but long-only has shown less volatile outperformance throughout the period.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
+<p>Looking at the overall strategy performances, long-short returns decayed significantly over time from 2006 until end 2016 possibly due to supply/demand shocks. On a rolling basis, long-short stated picking up again but this is mostly from the long-side of the trade as the short-side still falls short of expectations.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p>I ran a logistic regression using a bayesian glm to check if months and season are statistically significant. Turns out they are not, given the high Pr(&gt;|z|) values that the model spits out. Testing out the model predictions manage to yield decent results (61% accuracy) despite the insignificant Pr(&gt;|z|) values.</p>
+<pre><code>## 
+## Call:
+## NULL
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.4385  -1.0953  -0.7725   1.1786   1.6461  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)  -0.04995    0.40351  -0.124    0.901
+## moFeb        -0.74809    0.60234  -1.242    0.214
+## moMar        -0.56816    1.04246  -0.545    0.586
+## moApr         0.40206    1.04384   0.385    0.700
+## moMay         0.40206    1.04384   0.385    0.700
+## moJun         0.60791    1.04886   0.580    0.562
+## moJul        -0.61757    1.06198  -0.582    0.561
+## moAug        -0.38404    1.05475  -0.364    0.716
+## moSep        -0.08110    1.03504  -0.078    0.938
+## moOct         0.49348    1.03779   0.476    0.634
+## moNov        -0.47635    1.04008  -0.458    0.647
+## moDec         0.04715    0.57729   0.082    0.935
+## seasonSpring  0.24352    1.03229   0.236    0.814
+## seasonSummer -0.38900    1.04031  -0.374    0.708
+## seasonAutumn -0.06509    1.02769  -0.063    0.950
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 331.04  on 239  degrees of freedom
+## Residual deviance: 313.45  on 225  degrees of freedom
+## AIC: 343.45
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction down  up
+##       down  107  34
+##       up     69  54
+##                                           
+##                Accuracy : 0.6098          
+##                  95% CI : (0.5481, 0.6691)
+##     No Information Rate : 0.6667          
+##     P-Value [Acc &gt; NIR] : 0.9774620       
+##                                           
+##                   Kappa : 0.2016          
+##  Mcnemar&#39;s Test P-Value : 0.0008078       
+##                                           
+##             Sensitivity : 0.6080          
+##             Specificity : 0.6136          
+##          Pos Pred Value : 0.7589          
+##          Neg Pred Value : 0.4390          
+##              Prevalence : 0.6667          
+##          Detection Rate : 0.4053          
+##    Detection Prevalence : 0.5341          
+##       Balanced Accuracy : 0.6108          
+##                                           
+##        &#39;Positive&#39; Class : down            
+## </code></pre>
+<p>The model was also able to generate a decent equity curves except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season).</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-12-1.png" width="768" /></p>
+<p>As far as 2019 is concerned, the Bayesian GLM model is correct in its prediction for January, while the rest remains to be seen. The model deserves further research despite its flaws given its potential as seen in its equity curves during backtesting, coupled with decent accuracy (61%).</p>
+<pre><code>##          Date  mo season glm.pred
+## 1  2019-01-01 Jan Winter     down
+## 2  2019-02-01 Feb Winter     down
+## 3  2019-03-01 Mar Spring     down
+## 4  2019-04-01 Apr Spring       up
+## 5  2019-05-01 May Spring       up
+## 6  2019-06-01 Jun Summer       up
+## 7  2019-07-01 Jul Summer     down
+## 8  2019-08-01 Aug Summer     down
+## 9  2019-09-01 Sep Autumn     down
+## 10 2019-10-01 Oct Autumn       up
+## 11 2019-11-01 Nov Autumn     down
+## 12 2019-12-01 Dec Winter     down</code></pre>
+<p>Overall, implementing a long-only strategy based on identified strong periods have generated good returns relative to long-short and short-only strategies. However, returns are significantly volatile over the testing periods, suggesting more prudent position sizing is warranted.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-14-1.png" width="768" /></p>
+
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+<div class="container">
+  <div class="pagination">
+    
+      <button type="button" class="btn btn-secondary pull-left disabled"><i class="fa fa-chevron-left" aria-hidden="true"></i> Previous</button>
+    
+    
+      <button type="button" class="btn btn-secondary pull-left disabled">Next <i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+    
+  </div>
+</div>
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+            <img src="/images/powered-by-hugo.svg" alt="powered by hugo"></img>
+        </footer>
+      </div>
+    </div>
+    
+<script src="/js/dist/vendor/jquery/jquery.min.js"></script>
+<script src="/js/dist/vendor/tether/tether.min.js"></script>
+<script src="/js/dist/vendor/bootstrap/bootstrap.min.js"></script>
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-XXXXXX', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>

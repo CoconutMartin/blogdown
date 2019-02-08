@@ -1,10 +1,15 @@
 ---
 title: Seasonality trading with NatGas
+thumbnailImagePosition: left
+thumbnailImage: //https://ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png
+coverImage: //https://ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png
+metaAlignment: center
+coverMeta: out
 author: Coconut Martin
 date: '2019-02-02'
 slug: seasonality-trading-with-natgas
 categories:
-  - backtesting
+  - Backtesting
 tags:
   - R
 ---

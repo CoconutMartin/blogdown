@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.54.0 with theme Tranquilpeak 0.4.3-SNAPSHOT">
+<meta name="author" content="Emille Martin C. Munsayac II">
+<meta name="keywords" content="">
+<meta name="description" content="With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.">
+
+
+<meta property="og:description" content="With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Seasonality trading with NatGas">
+<meta name="twitter:title" content="Seasonality trading with NatGas">
+<meta property="og:url" content="/2019/02/seasonality-trading-with-natgas/">
+<meta property="twitter:url" content="/2019/02/seasonality-trading-with-natgas/">
+<meta property="og:site_name" content="Bird Math">
+<meta property="og:description" content="With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.">
+<meta name="twitter:description" content="With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.">
+<meta property="og:locale" content="en-us">
+
+  
+    <meta property="article:published_time" content="2019-02-02T00:00:00">
+  
+  
+    <meta property="article:modified_time" content="2019-02-02T00:00:00">
+  
+  
+  
+    
+      <meta property="article:section" content="Backtesting">
+    
+  
+  
+    
+      <meta property="article:tag" content="R">
+    
+  
+
+
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+
+  <meta property="og:image" content="//ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png">
+  <meta property="twitter:image" content="//ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png">
+
+
+  <meta property="og:image" content="//ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png">
+  <meta property="twitter:image" content="//ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png">
+
+
+
+
+  <meta property="og:image" content="https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png">
+  <meta property="twitter:image" content="https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png">
+
+
+    <title>Seasonality trading with NatGas</title>
+
+    <link rel="icon" href="/favicon.png">
+    
+
+    
+
+    <link rel="canonical" href="/2019/02/seasonality-trading-with-natgas/">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/jquery.fancybox.min.css" integrity="sha256-vuXZ9LGmmwtjqFX1F+EKin1ThZMub58gKULUyf0qECk=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.4/helpers/jquery.fancybox-thumbs.min.css" integrity="sha256-SEa4XYAHihTcEP1f5gARTB2K26Uk8PsndQYHQC1f4jU=" crossorigin="anonymous" />
+    
+    
+    <link rel="stylesheet" href="/css/style-nnm2spxvve8onlujjlegkkytaehyadd4ksxc1hyzzq9a2wvtrgbljqyulomn.min.css" />
+    
+    
+
+    
+      
+    
+    
+  </head>
+
+  <body>
+    <div id="blog">
+      <header id="header" data-behavior="5">
+  <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+  <div class="header-title">
+    <a class="header-title-link" href="/">Bird Math</a>
+  </div>
+  
+    
+      <a class="header-right-picture "
+         href="/#about">
+    
+    
+    
+      
+        <img class="header-picture" src="https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png" alt="Author&#39;s picture" />
+      
+    
+    </a>
+  
+</header>
+
+      <nav id="sidebar" data-behavior="5">
+  <div class="sidebar-container">
+    
+      <div class="sidebar-profile">
+        <a href="/#about">
+          <img class="sidebar-profile-picture" src="https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png" alt="Author&#39;s picture" />
+        </a>
+        <h4 class="sidebar-profile-name">Emille Martin C. Munsayac II</h4>
+        
+          <h5 class="sidebar-profile-bio">Past performance could be an indication of the future</h5>
+        
+      </div>
+    
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+      
+      <span class="sidebar-button-desc">Home</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/categories">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+      
+      <span class="sidebar-button-desc">Categories</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/tags">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+      
+      <span class="sidebar-button-desc">Tags</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/archives">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+      
+      <span class="sidebar-button-desc">Archives</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/#about">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+      
+      <span class="sidebar-button-desc">About</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://github.com/kakawait">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-github"></i>
+      
+      <span class="sidebar-button-desc">GitHub</span>
+    </a>
+  </li>
+
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="https://stackoverflow.com/users/636472/kakawait">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-stack-overflow"></i>
+      
+      <span class="sidebar-button-desc">Stack Overflow</span>
+    </a>
+  </li>
+
+
+    </ul>
+    <ul class="sidebar-buttons">
+      
+  <li class="sidebar-button">
+    
+      <a class="sidebar-button-link " href="/index.xml">
+    
+      <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+      
+      <span class="sidebar-button-desc">RSS</span>
+    </a>
+  </li>
+
+
+    </ul>
+  </div>
+</nav>
+
+      
+  <div class="post-header-cover
+              text-center
+              "
+       style="background-image:url('//ucarecdn.com/90d88c66-58d8-4bf9-a11c-669b7e6d63d2/birdmath.png')"
+       data-behavior="5">
+    
+  </div>
+
+
+      <div id="main" data-behavior="5"
+        class="hasCover
+               hasCoverMetaOut
+               ">
+        <article class="post" itemscope itemType="http://schema.org/BlogPosting">
+          
+          
+            <div class="post-header main-content-wrap text-center">
+  
+    <h1 class="post-title" itemprop="headline">
+      Seasonality trading with NatGas
+    </h1>
+  
+  
+  <div class="postShorten-meta post-meta">
+    
+      <time itemprop="datePublished" datetime="2019-02-02T00:00:00Z">
+        
+  February 2, 2019
+
+      </time>
+    
+    
+  
+  
+    <span>in</span>
+    
+      <a class="category-link" href="/categories/backtesting">Backtesting</a>
+    
+  
+
+  </div>
+
+</div>
+          
+          <div class="post-content markdown" itemprop="articleBody">
+            <div class="main-content-wrap">
+              
+
+
+<p>With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.</p>
+<p>However, NatGas prices does not seem to follow this concept strictly based on its monthly median returns. Prices rally from March to April, eases down until July before heading up again until October. This is completely out-of-synch of US seasons and even violating the demand seasonality during the winter season so I might be missing something here.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<p>Decomposing NatGas returns yields its trend and seasonal patterns that could be tradable…</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
+<p>…but I will base the trading signal off the observed seasonality of median returns for now, with positions placed by the start of the month. Backtesting rules based on seasonality:</p>
+<p>Short: Feb, May-Jul, Nov (could have NatGas’ rally until end-Nov18 be an outlier?)</p>
+<p>Long: Mar-Apr, Aug-Oct, Dec-Jan</p>
+<p>Backtest results show the long-short strategy worked well in the past up until it started underperforming by mid-2012 and decaying further until end 2017. Short-side of the trade drove the performance decay that probably came from a supply/demand shock (supply disruption, persistent demand despite warmer temperatures, lower warm temperatures).</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p>Meanwhile, the long-only strategy generated higher information ratio compared to long-short, along with oscillations over time. The oscillations could be a function of sentiment or major events that drove market volatility but this would need further research before saying something definitively.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p>Rolling performance of all strategies vary from time to time but long-only has shown less volatile outperformance throughout the period.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
+<p>Looking at the overall strategy performances, long-short returns decayed significantly over time from 2006 until end 2016 possibly due to supply/demand shocks. On a rolling basis, long-short stated picking up again but this is mostly from the long-side of the trade as the short-side still falls short of expectations.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p>I ran a logistic regression using a bayesian glm to check if months and season are statistically significant. Turns out they are not, given the high Pr(&gt;|z|) values that the model spits out. Testing out the model predictions manage to yield decent results (61% accuracy) despite the insignificant Pr(&gt;|z|) values.</p>
+<pre><code>## 
+## Call:
+## NULL
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.4385  -1.0953  -0.7725   1.1786   1.6461  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)  -0.04995    0.40351  -0.124    0.901
+## moFeb        -0.74809    0.60234  -1.242    0.214
+## moMar        -0.56816    1.04246  -0.545    0.586
+## moApr         0.40206    1.04384   0.385    0.700
+## moMay         0.40206    1.04384   0.385    0.700
+## moJun         0.60791    1.04886   0.580    0.562
+## moJul        -0.61757    1.06198  -0.582    0.561
+## moAug        -0.38404    1.05475  -0.364    0.716
+## moSep        -0.08110    1.03504  -0.078    0.938
+## moOct         0.49348    1.03779   0.476    0.634
+## moNov        -0.47635    1.04008  -0.458    0.647
+## moDec         0.04715    0.57729   0.082    0.935
+## seasonSpring  0.24352    1.03229   0.236    0.814
+## seasonSummer -0.38900    1.04031  -0.374    0.708
+## seasonAutumn -0.06509    1.02769  -0.063    0.950
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 331.04  on 239  degrees of freedom
+## Residual deviance: 313.45  on 225  degrees of freedom
+## AIC: 343.45
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction down  up
+##       down  107  34
+##       up     69  54
+##                                           
+##                Accuracy : 0.6098          
+##                  95% CI : (0.5481, 0.6691)
+##     No Information Rate : 0.6667          
+##     P-Value [Acc &gt; NIR] : 0.9774620       
+##                                           
+##                   Kappa : 0.2016          
+##  Mcnemar&#39;s Test P-Value : 0.0008078       
+##                                           
+##             Sensitivity : 0.6080          
+##             Specificity : 0.6136          
+##          Pos Pred Value : 0.7589          
+##          Neg Pred Value : 0.4390          
+##              Prevalence : 0.6667          
+##          Detection Rate : 0.4053          
+##    Detection Prevalence : 0.5341          
+##       Balanced Accuracy : 0.6108          
+##                                           
+##        &#39;Positive&#39; Class : down            
+## </code></pre>
+<p>The model was also able to generate a decent equity curves except for the short-only strategy despite the statistically insignificance of the predictor variables (months and season).</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-12-1.png" width="768" /></p>
+<p>As far as 2019 is concerned, the Bayesian GLM model is correct in its prediction for January, while the rest remains to be seen. The model deserves further research despite its flaws given its potential as seen in its equity curves during backtesting, coupled with decent accuracy (61%).</p>
+<pre><code>##          Date  mo season glm.pred
+## 1  2019-01-01 Jan Winter     down
+## 2  2019-02-01 Feb Winter     down
+## 3  2019-03-01 Mar Spring     down
+## 4  2019-04-01 Apr Spring       up
+## 5  2019-05-01 May Spring       up
+## 6  2019-06-01 Jun Summer       up
+## 7  2019-07-01 Jul Summer     down
+## 8  2019-08-01 Aug Summer     down
+## 9  2019-09-01 Sep Autumn     down
+## 10 2019-10-01 Oct Autumn       up
+## 11 2019-11-01 Nov Autumn     down
+## 12 2019-12-01 Dec Winter     down</code></pre>
+<p>Overall, implementing a long-only strategy based on identified strong periods have generated good returns relative to long-short and short-only strategies. However, returns are significantly volatile over the testing periods, suggesting more prudent position sizing is warranted.</p>
+<p><img src="/post/2019-02-02-seasonality-trading-with-natgas_files/figure-html/unnamed-chunk-14-1.png" width="768" /></p>
+
+              
+            </div>
+          </div>
+          <div id="post-footer" class="post-footer main-content-wrap">
+            
+              
+                
+                
+                  <div class="post-footer-tags">
+                    <span class="text-color-light text-small">TAGGED IN</span><br/>
+                    
+  <a class="tag tag--primary tag--small" href="/tags/r/">R</a>
+
+                  </div>
+                
+              
+            
+            <div class="post-actions-wrap">
+  
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=/2019/02/seasonality-trading-with-natgas/">
+              <i class="fa fa-facebook-official"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2019/02/seasonality-trading-with-natgas/">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  
+</div>
+
+            
+              
+                <div id="disqus_thread">
+  <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+              
+            
+          </div>
+        </article>
+        <footer id="footer" class="main-content-wrap">
+  <span class="copyrights">
+    &copy; 2019 Emille Martin C. Munsayac II. All Rights Reserved
+  </span>
+</footer>
+
+      </div>
+      <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+        <div class="post-actions-wrap">
+  
+      <nav >
+        <ul class="post-actions post-action-nav">
+          
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <i class="fa fa-angle-left"></i>
+                  <span class="hide-xs hide-sm text-small icon-ml">NEXT</span>
+                </a>
+            </li>
+            <li class="post-action">
+              
+                <a class="post-action-btn btn btn--disabled">
+              
+                  <span class="hide-xs hide-sm text-small icon-mr">PREVIOUS</span>
+                  <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+          
+        </ul>
+      </nav>
+    <ul class="post-actions post-action-share" >
+      
+        <li class="post-action hide-lg hide-md hide-sm">
+          <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions">
+            <i class="fa fa-share-alt"></i>
+          </a>
+        </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=/2019/02/seasonality-trading-with-natgas/">
+              <i class="fa fa-facebook-official"></i>
+            </a>
+          </li>
+        
+          <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=/2019/02/seasonality-trading-with-natgas/">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+        
+      
+      
+        <li class="post-action">
+          <a class="post-action-btn btn btn--default" href="#disqus_thread">
+            <i class="fa fa-comment-o"></i>
+          </a>
+        </li>
+      
+      <li class="post-action">
+        
+          <a class="post-action-btn btn btn--default" href="#">
+        
+          <i class="fa fa-list"></i>
+        </a>
+      </li>
+    </ul>
+  
+</div>
+
+      </div>
+      <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+  <i id="btn-close-shareoptions" class="fa fa-close"></i>
+  <ul class="share-options">
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=%2F2019%2F02%2Fseasonality-trading-with-natgas%2F">
+          <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+        </a>
+      </li>
+    
+      <li class="share-option">
+        <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=%2F2019%2F02%2Fseasonality-trading-with-natgas%2F">
+          <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+    </div>
+    
+    <div id="about">
+  <div id="about-card">
+    <div id="about-btn-close">
+      <i class="fa fa-remove"></i>
+    </div>
+    
+      <img id="about-card-picture" src="https://cdn1.iconfinder.com/data/icons/ninja-things-1/1772/ninja-simple-512.png" alt="Author&#39;s picture" />
+    
+    <h4 id="about-card-name">Emille Martin C. Munsayac II</h4>
+    
+      <div id="about-card-bio">Past performance could be an indication of the future</div>
+    
+    
+      <div id="about-card-job">
+        <i class="fa fa-briefcase"></i>
+        <br/>
+        Your job title
+      </div>
+    
+    
+      <div id="about-card-location">
+        <i class="fa fa-map-marker"></i>
+        <br/>
+        Philippines
+      </div>
+    
+  </div>
+</div>
+
+    <div id="algolia-search-modal" class="modal-container">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="close-button"><i class="fa fa-close"></i></span>
+      <a href="https://algolia.com" target="_blank" rel="noopener" class="searchby-algolia text-color-light link-unstyled">
+        <span class="searchby-algolia-text text-color-light text-small">by</span>
+        <img class="searchby-algolia-logo" src="https://www.algolia.com/static_assets/images/press/downloads/algolia-light.svg">
+      </a>
+      <i class="search-icon fa fa-search"></i>
+      <form id="algolia-search-form">
+        <input type="text" id="algolia-search-input" name="search"
+          class="form-control input--large search-input" placeholder="Search" />
+      </form>
+    </div>
+    <div class="modal-body">
+      <div class="no-result text-color-light text-center">no post found</div>
+      <div class="results">
+        
+        
+          <div class="media">
+            
+            <div class="media-body">
+              <a class="link-unstyled" href="/2019/02/seasonality-trading-with-natgas/">
+                <h3 class="media-heading">Seasonality trading with NatGas</h3>
+              </a>
+              <span class="media-meta">
+                <span class="media-date text-small">
+                  Feb 2, 2019
+                </span>
+              </span>
+              <div class="media-content hide-xs font-merryweather">With the benefit of hindsight, I have seen some seasonality patterns in NatGas that seemed to generate decent returns after mannualy checking the charts. However, I haven’t really done any work before to test if those patterns held up consistently in the past. NatGas typically rallies during the fourth quarter as demand perks up due to winter season, followed up by lower prices as demand eases up during the after the winter season.</div>
+            </div>
+            <div style="clear:both;"></div>
+            <hr>
+          </div>
+        
+      </div>
+    </div>
+    <div class="modal-footer">
+      <p class="results-count text-medium"
+         data-message-zero="no post found"
+         data-message-one="1 post found"
+         data-message-other="{n} posts found">
+         1 posts found
+      </p>
+    </div>
+  </div>
+</div>
+    
+  
+    
+    <div id="cover" style="background-image:url('/images/cover.jpg');"></div>
+  
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.7/js/jquery.fancybox.min.js" integrity="sha256-GEAnjcTqVP+vBp3SSc8bEDQqvWAZMiHyUSIorrWwH50=" crossorigin="anonymous"></script>
+
+
+<script src="/js/script-qi9wbxp2ya2j6p7wx1i6tgavftewndznf4v0hy2gvivk1rxgc3lm7njqb6bz.min.js"></script>
+
+
+<script lang="javascript">
+window.onload = updateMinWidth;
+window.onresize = updateMinWidth;
+document.getElementById("sidebar").addEventListener("transitionend", updateMinWidth);
+function updateMinWidth() {
+  var sidebar = document.getElementById("sidebar");
+  var main = document.getElementById("main");
+  main.style.minWidth = "";
+  var w1 = getComputedStyle(main).getPropertyValue("min-width");
+  var w2 = getComputedStyle(sidebar).getPropertyValue("width");
+  var w3 = getComputedStyle(sidebar).getPropertyValue("left");
+  main.style.minWidth = `calc(${w1} - ${w2} - ${w3})`;
+}
+</script>
+
+<script>
+$(document).ready(function() {
+  hljs.configure({ classPrefix: '', useBR: false });
+  $('pre.code-highlight > code, pre > code').each(function(i, block) {
+    if (!$(this).hasClass('codeblock')) {
+      $(this).addClass('codeblock');
+    }
+    hljs.highlightBlock(block);
+  });
+});
+</script>
+
+
+  
+    
+      <script>
+        var disqus_config = function () {
+          this.page.url = '\/2019\/02\/seasonality-trading-with-natgas\/';
+          
+            this.page.identifier = '\/2019\/02\/seasonality-trading-with-natgas\/'
+          
+        };
+        (function() {
+          
+          
+          if (window.location.hostname == "localhost") {
+            return;
+          }
+          var d = document, s = d.createElement('script');
+          var disqus_shortname = 'hugo-tranquilpeak-theme';
+          s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+    
+  
+
+
+
+
+    
+  </body>
+</html>
+
