@@ -44,7 +44,7 @@ nft %>%
   plot_ly(x = ~reorder(key, nft.rank), y = ~value/1e9, 
           color = ~top.x, 
           colors = c("#2ca25f", "#C00000")) %>% 
-  add_column() %>% 
+  add_bars() %>% 
   layout(title = paste0("<b> Top 10 Latest Foreign Buying and Selling </b>"),
          titlefont = list(color = "#C00000",
                           family = "arial"),
@@ -58,7 +58,6 @@ nft %>%
          )
 ```
 
-
 ```{r}
 set.seed(999)
 
@@ -70,7 +69,7 @@ nft.rolling <- nft %>%
   group_by(key) %>%
   mutate(
     rolling.n = rollapplyr(value, FUN = sum, width = nft.period.days, na.rm = TRUE, fill = NA),
-    rolling.1y = rollapplyr(value, FUN = sum, width = 252, na.rm = TRUE, fill = NA),
+    rolling.1y = rollapplyr(value, FUN = sum, width = 252, na.rm = TRUE, fill = NA)
   ) %>% 
   slice(which.max(Date)) %>% 
   filter(rolling.n != 0) %>% 
@@ -91,7 +90,7 @@ nft.rolling %>%
   plot_ly(x = ~reorder(key, -rolling.n), y = ~rolling.n/1e9, 
           color = ~top.x, 
           colors = c("#2ca25f", "#C00000")) %>% 
-  add_column() %>% 
+  add_bars() %>% 
   layout(title = paste0("<b>", "Top 10 Foreign Buying and Selling in the Last ", nft.period.days, " Days", "</b>"),
          titlefont = list(color = "#C00000",
                           family = "arial"),
