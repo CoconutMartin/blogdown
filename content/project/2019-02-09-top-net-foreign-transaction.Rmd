@@ -1,8 +1,8 @@
 ---
 title: Top Net Foreign Transaction
 author: Coconut Martin
-date: '2019-02-02'
-slug: top-foreign-transaction
+date: '2019-02-09'
+slug: top-net-foreign-transaction
 categories:
   - charting
 tags:
