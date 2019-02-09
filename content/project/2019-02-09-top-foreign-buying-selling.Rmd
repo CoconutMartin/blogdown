@@ -1,0 +1,127 @@
+---
+title: Top Net Foreign Transaction
+author: Coconut Martin
+date: '2019-02-02'
+slug: top-foreign-transaction
+categories:
+  - charting
+tags:
+  - R
+description: ''
+repo: ''
+weight: 0
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE)
+library(tidyquant); library(plotly)
+
+nft <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares nft.csv") %>% mutate(Date = dmy(Date))
+
+theme_set(theme_tq() +
+            theme(panel.grid = element_blank()))
+```
+
+```{r}
+nft %>% 
+  filter(year(Date) == year(Sys.Date())) %>% 
+  # create a flag to check if date is a trading day, 1 = yes
+  mutate(flag.x = ifelse(!is.na(sum(nft[, 2:ncol(nft)], na.rm = TRUE)), 1, NA)) %>% 
+  gather(key, value, -Date, -flag.x) %>% 
+  group_by(key) %>% 
+  filter(!is.na(value)) %>% 
+  slice(which.max(Date)) %>% 
+  ungroup() %>% 
+  filter(Date == max(Date)) %>% 
+  group_by(Date) %>% 
+  mutate(
+    nft.rank = rank(-value, ties.method = "random", na.last = TRUE),
+    top.x = ifelse(nft.rank <= 10, "Top Buying",
+                   ifelse(nft.rank >= (max(nft.rank)-10), "Top Selling", NA))
+  ) %>% 
+  na.omit() %>% 
+  arrange(nft.rank) %>% 
+  plot_ly(x = ~reorder(key, nft.rank), y = ~value/1e9, 
+          color = ~top.x, 
+          colors = c("#2ca25f", "#C00000")) %>% 
+  add_column() %>% 
+  layout(title = paste0("<b> Top 10 Latest Foreign Buying and Selling </b>"),
+         titlefont = list(color = "#C00000",
+                          family = "arial"),
+         yaxis = list(title = "PhP in Billions",
+                      family = "arial",
+                      showgrid = FALSE),
+         xaxis = list(title = "",
+                      family = "arial",
+                      tickangle = 90,
+                      showgrid = FALSE)
+         )
+```
+
+
+```{r}
+set.seed(999)
+
+nft.period.days <- round(20)
+
+nft.rolling <- nft %>%
+  filter(year(Date) >= 2017) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>%
+  mutate(
+    rolling.n = rollapplyr(value, FUN = sum, width = nft.period.days, na.rm = TRUE, fill = NA),
+    rolling.1y = rollapplyr(value, FUN = sum, width = 252, na.rm = TRUE, fill = NA),
+  ) %>% 
+  slice(which.max(Date)) %>% 
+  filter(rolling.n != 0) %>% 
+  group_by(Date) %>% 
+  select(-value) %>% 
+  mutate(
+    nft.rank = rank(-rolling.n, ties.method = "random", na.last = TRUE),
+    top.x = ifelse(nft.rank <= 10, "Top Buying",
+                   ifelse(nft.rank >= (max(nft.rank)-10), "Top Selling", NA))
+      ) %>% 
+  arrange(top.x) %>% 
+  mutate(
+    top.x = factor(top.x, levels = unique(top.x))
+  ) %>% 
+  na.omit()
+
+nft.rolling %>% 
+  plot_ly(x = ~reorder(key, -rolling.n), y = ~rolling.n/1e9, 
+          color = ~top.x, 
+          colors = c("#2ca25f", "#C00000")) %>% 
+  add_column() %>% 
+  layout(title = paste0("<b>", "Top 10 Foreign Buying and Selling in the Last ", nft.period.days, " Days", "</b>"),
+         titlefont = list(color = "#C00000",
+                          family = "arial"),
+         yaxis = list(title = "PhP in Billions",
+                      family = "arial",
+                      showgrid = FALSE),
+         xaxis = list(title = "",
+                      family = "arial",
+                      tickangle = 90,
+                      showgrid = FALSE)
+         )
+```
+
+```{r}
+nft.rolling %>% 
+  plot_ly(x = ~rolling.1y/1e9, y = ~rolling.n/1e9, color = ~top.x, 
+          colors = c("#2ca25f", "#C00000"),
+          type = "scatter", 
+          mode = "text", 
+          text = ~paste0("<b>", key, "</b>"), 
+          textposition = "Middle", 
+          textfont = list(family = "arial")) %>% 
+  layout(title = paste0("<b>", "Top 10 Foreign Buying and Selling in the Last ", nft.period.days, " and 252 Days", "</b>"),
+         titlefont = list(color = "#C00000",
+                          family = "arial"),
+         xaxis = list(title = "252-Day Net Foreign Transaction (PHPbn)",
+                      family = "arial",
+                      showgrid = FALSE),
+         yaxis = list(title = "20-Day Net Foreign Transaction (PHPbn)",
+                      family = "arial",
+                      showgrid = FALSE))
+```
+
