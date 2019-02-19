@@ -21,7 +21,7 @@ library(tidyquant); library(plotly)
 theme_set(theme_tq() +
             theme(panel.grid = element_blank()))
 
-x <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date))
+x <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date))
 ```
 
 ```{r, warning=FALSE}
