@@ -27,12 +27,13 @@ five.color <- c("#Ca0020", "#f4a582", "#b2182b", "#bababa", "#404040")
 
 cleaner <- function(x) {ifelse(is.nan(x) | is.infinite(x), NA, x)}
 
-v <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = ymd(Date))
-p <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = ymd(Date))
-m <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = ymd(Date))
+v <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = ymd(Date))
+p <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = ymd(Date))
+m <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = ymd(Date))
 ```
 
 ```{r, warning=FALSE, include=FALSE}
+# Performance of large caps only
 turnover.cutoff <- 5
 mcap.cutoff <- 100
 
@@ -54,13 +55,11 @@ mcap <- m %>%
   gather(key, value, -Date) %>% 
   mutate(
     value = value / 1e3,
-    mcap.flag = ifelse(value <= mcap.cutoff & value > 0, 1, 0)
+    mcap.flag = ifelse(value >= mcap.cutoff & value > 0, 1, 0)
   ) %>% 
+
   select(-value)
 
-```
-
-```{r}
 set.seed(999)
 
 return.df <- p %>% 
@@ -107,7 +106,7 @@ work.set <- return.df %>%
   mutate(total.quantile.returns = cumprod(1 + quantile.returns) - 1,
          rolling.annual.return = rollapplyr(1 + quantile.returns, width = 12, FUN = prod, partial = TRUE) - 1)
 
-work.set %>% 
+large.cap <- work.set %>% 
   select(Date, ranking.quantile, rolling.annual.return) %>% 
   spread(ranking.quantile, rolling.annual.return) %>% 
   left_join(., psei) %>% 
@@ -116,19 +115,113 @@ work.set %>%
     x = ~Date, y = ~value * 100, color = ~factor(key), 
     colors = c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "grey20"),
     name = ~ifelse(key == "psei", "PSEI", paste0("Quintile ", key)),
-    mode = "lines", type = "scatter"
+    mode = "lines", type = "scatter",
+    legendgroup = ~ifelse(key == "psei", "PSEI", paste0("Quintile ", key))
     ) %>%
   layout(
-    title = "<b>Rolling Annual Returns per Quantile</b>",
+    title = "<b>Rolling Annual Returns per Return Quantile</b>",
     titlefont = list(family = "arial",
                      color = "#C00000"),
-    xaxis = list(title = "",
+    xaxis = list(title = "<b>Large Caps Only</b>",
+                 titlefont = list(color = "#C00000",
+                                  size = 12),
                  font = list(family = "arial",
-                             showgrid = FALSE)),
+                             color = "#C00000",
+                             size = 9),
+                 showgrid = FALSE),
     yaxis = list(title = "Rolling Returns [%]",
-                 font = list(family = "arial",
-                             showgrid = FALSE)),
+                 font = list(family = "arial"),
+                 showgrid = FALSE),
     legend = list(font = list(family = "arial"))
          )
+```
+
+```{r, warning=FALSE}
+# Performance excluding large caps
+mcap.ex.large <- m %>% 
+  gather(key, value, -Date) %>% 
+  mutate(
+    value = value / 1e3,
+    mcap.flag = ifelse(value <= mcap.cutoff & value > 0, 1, 0)
+  ) %>% 
+  select(-value)
+
+set.seed(999)
+
+return.df.ex.large <- p %>% 
+  tq_transmute(mutate_fun = to.period, period = "months") %>% 
+  gather(key, value, -Date) %>% 
+  left_join(., to) %>% 
+  left_join(., mcap.ex.large) %>% 
+  filter(key != "PSEI") %>% 
+  group_by(key) %>% 
+  mutate(
+    monthly.return = ROC(value, n = 1 , type = "discrete") %>% cleaner * turnover.flag * mcap.flag,
+    yearly.return = ROC(value, n = 12, type = "discrete") %>% cleaner * turnover.flag * mcap.flag
+    ) %>% 
+  group_by(Date) %>% 
+  mutate(
+    return.ranking = rank(yearly.return, ties.method = "random", na.last = TRUE),
+    n = sum(!is.na(yearly.return)),
+    ranking.quantile = ntile(return.ranking, 5)
+    #ranking.quantile = ifelse(return.ranking <= n * 0.20, 1,
+    #                          ifelse(return.ranking > n * 0.20 & return.ranking <= n * 0.40, 2,
+    #                                 ifelse(return.ranking > n * 0.40 & return.ranking <= n * 0.60, 3,
+    #                                        ifelse(return.ranking > n * 0.60 & return.ranking <= n * 0.80, 4,
+    #                                               ifelse(return.ranking > n * 0.80, 5, NA)))))
+    ) %>% 
+  select(Date, key, monthly.return, ranking.quantile)
+
+psei <- p %>%
+  tq_transmute(mutate_fun = to.period, period = "months") %>% 
+  gather(key, value, -Date) %>% 
+  filter(key == "PSEI") %>% 
+  mutate(
+    monthly.return = ROC(value, n = 1, type = "discrete") %>% cleaner(),
+    psei = rollapplyr(1 + monthly.return, width = 12, FUN = prod, partial = TRUE) - 1
+    ) %>% 
+  select(Date, psei)
+
+work.set.ex.large <- return.df.ex.large %>%
+  group_by(Date, ranking.quantile) %>% 
+  summarise(quantile.returns = mean(monthly.return, na.rm = TRUE) %>% cleaner) %>% 
+  na.omit() %>% 
+  arrange(ranking.quantile) %>% 
+  filter(year(Date) >= 2000) %>% 
+  group_by(ranking.quantile) %>% 
+  mutate(total.quantile.returns = cumprod(1 + quantile.returns) - 1,
+         rolling.annual.return = rollapplyr(1 + quantile.returns, width = 12, FUN = prod, partial = TRUE) - 1)
+
+ex.large <- work.set.ex.large %>% 
+  select(Date, ranking.quantile, rolling.annual.return) %>% 
+  spread(ranking.quantile, rolling.annual.return) %>% 
+  left_join(., psei) %>% 
+  gather(key, value, -Date) %>%
+  plot_ly(
+    x = ~Date, y = ~value * 100, color = ~factor(key), 
+    colors = c("#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "grey20"),
+    name = ~ifelse(key == "psei", "PSEI", paste0("Quintile ", key)),
+    mode = "lines", type = "scatter",
+    legendgroup = ~ifelse(key == "psei", "PSEI", paste0("Quintile ", key)),
+    showlegend = FALSE
+    ) %>%
+  layout(
+    title = "<b>Rolling Annual Returns per Return Quantile</b>",
+    titlefont = list(family = "arial",
+                     color = "#C00000"),
+    xaxis = list(title = "<b>Ex-Large Caps</b>",
+                 titlefont = list(color = "#C00000",
+                                  size = 12),
+                 font = list(family = "arial"),
+                 showgrid = FALSE),
+    yaxis = list(title = "Rolling Returns [%]",
+                 font = list(family = "arial"),
+                 showgrid = FALSE),
+    legend = list(font = list(family = "arial"))
+         )
+```
+
+```{r}
+subplot(large.cap, ex.large, shareY = TRUE, shareX = TRUE)
 ```
 
