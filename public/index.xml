@@ -17,7 +17,7 @@
       <pubDate>Fri, 22 Feb 2019 00:00:00 +0000</pubDate>
       
       <guid>/project/rolling-and-static-forward-per-bands/</guid>
-      <description># Rolling average of blended forward estimates (1BF)bf1.rolling &amp;lt;- per1 %&amp;gt;% filter(year(Date) &amp;gt;= (last.5yrs-5)) %&amp;gt;% select(Date, psei) %&amp;gt;% gather(key, value, -Date) %&amp;gt;% mutate(value = replace(value, value == &amp;quot;#N/A N/A&amp;quot;, NA) %&amp;gt;% as.numeric()) %&amp;gt;% group_by(key) %&amp;gt;% mutate(rolling.avg = rollapplyr(value, FUN = mean, width = 252 * 5, na.rm = TRUE, fill = NA),rolling.sd = rollapplyr(value, FUN = sd, width = 252 * 5, na.</description>
+      <description></description>
     </item>
     
     <item>
