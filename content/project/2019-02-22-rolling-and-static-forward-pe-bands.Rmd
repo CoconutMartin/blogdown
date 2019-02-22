@@ -1,0 +1,230 @@
+---
+title: Rolling and Static Forward PE Bands
+author: Coconut Martin
+date: '2019-02-21'
+slug: rolling-and-static-forward-pe-bands
+categories:
+  - charting
+tags:
+  - R
+description: ''
+repo: ''
+weight: 0
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyquant); library(plotly)
+
+per1 <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares forward per 1bf.csv", na.strings = c("", "NA")) %>% mutate(Date = dmy(Date))
+per2 <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares forward per 2bf.csv", na.strings = c("", "NA")) %>% mutate(Date = dmy(Date))
+
+theme_set(theme_tq() +
+            theme(panel.grid = element_blank(),
+                  axis.text.x = element_text(angle = 90, vjust = 0.5)))
+
+psei <- c("AC", "AEV", "AGI", "ALI", "AP", "BDO", "BPI",
+          "DMC", "RRHI", "FGEN", "GLO", "GTCAP", "ICT", "JFC", "JGS",
+          "LTG", "MBT", "MEG", "MER", "MPI", "BLOOM", "PGOLD", "RLC",
+          "SCC", "SECB", "SM", "SMC", "SMPH", "TEL", "URC", "PSEI", "PCOR")
+
+last.5yrs <- year(Sys.Date()) - 5
+```
+
+```{r, fig.width = 20, fig.height = 7, warning=FALSE}
+# Rolling average of blended forward estimates (1BF)
+bf1.rolling <-  per1 %>% 
+  filter(
+    year(Date) >= (last.5yrs-5)
+  ) %>% 
+  select(Date, psei) %>% 
+  gather(key, value, -Date) %>% 
+  mutate(
+    value = replace(value, value == "#N/A N/A", NA) %>% as.numeric()
+  ) %>% 
+  group_by(key) %>% 
+  mutate(
+    rolling.avg = rollapplyr(value, FUN = mean, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sd = rollapplyr(value, FUN = sd, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sdplus1 = rolling.avg + (rolling.sd * 1),
+    rolling.sdplus2 = rolling.avg + (rolling.sd * 2),
+    rolling.sdminus1 = rolling.avg - (rolling.sd * 1),
+    rolling.sdminus2 = rolling.avg - (rolling.sd * 2)
+  ) %>% 
+  na.omit() %>% 
+  filter(
+    year(Date) >= last.5yrs
+  )
+
+bf1.rolling %>% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, rolling.avg), color = "red", size = 1) +
+  geom_ribbon(aes(ymin = rolling.sdminus2, ymax = rolling.sdplus2), color = NA, fill = "red", alpha = 0.10, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = rolling.sdminus1, ymax = rolling.sdplus1), color = NA, fill = "red", alpha = 0.30, show.legend = FALSE) +
+  labs(title = "Historical Forward Price-Earning Ratio of PSEI Members",
+       subtitle = "Rolling Average of Blended Current Fiscal Year Forward Estimates (1BF: 2018)",
+       x = "",
+       y = "Price-Earnings Ratio [X]") +
+  facet_wrap(~key, scales = "free_y", nrow = 4)
+```
+
+```{r, fig.width = 20, fig.height = 7, warning=FALSE}
+# Rolling average of blended forward estimates (2BF)
+bf2.rolling <- per2 %>% 
+  filter(
+    year(Date) >= (last.5yrs-5)
+  ) %>% 
+  select(Date, psei) %>% 
+  gather(key, value, -Date) %>% 
+  mutate(
+    value = replace(value, value == "#N/A N/A", NA) %>% as.numeric()
+  ) %>% 
+  group_by(key) %>% 
+  mutate(
+    rolling.avg = rollapplyr(value, FUN = mean, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sd = rollapplyr(value, FUN = sd, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sdplus1 = rolling.avg + (rolling.sd * 1),
+    rolling.sdplus2 = rolling.avg + (rolling.sd * 2),
+    rolling.sdminus1 = rolling.avg - (rolling.sd * 1),
+    rolling.sdminus2 = rolling.avg - (rolling.sd * 2)
+  ) %>% 
+  na.omit() %>% 
+  filter(
+    year(Date) >= last.5yrs
+  )
+
+bf2.rolling %>% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, rolling.avg), color = "red", size = 1) +
+  geom_ribbon(aes(ymin = rolling.sdminus2, ymax = rolling.sdplus2), color = NA, fill = "red", alpha = 0.10, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = rolling.sdminus1, ymax = rolling.sdplus1), color = NA, fill = "red", alpha = 0.30, show.legend = FALSE) +
+  labs(title = "Historical Forward Price-Earning Ratio of PSEI Members",
+       subtitle = "Rolling Average of Blended 1-Year Forward Estimates (2BF: 2019)",
+       x = "",
+       y = "Price-Earnings Ratio [X]") +
+  facet_wrap(~key, scales = "free_y", nrow = 4)
+```
+
+```{r, fig.width = 20, fig.height = 7, warning=FALSE}
+# Static average of blended forward estimates (1BF)
+bf1.static <- per1 %>% 
+  gather(key, value, -Date) %>% 
+  mutate(
+    value = replace(value, value == "#N/A N/A", NA) %>% as.numeric()
+  ) %>% 
+  spread(key, value) %>% 
+  select(Date, psei) %>% 
+  gather(key, value, -Date) %>% 
+  filter(
+    year(Date) >= last.5yrs
+    ) %>% 
+  group_by(key) %>% 
+  mutate(
+    historical.avg.5y = mean(value, na.rm = TRUE),
+    historical.sd = sd(value, na.rm = TRUE),
+    static.spread = value - historical.avg.5y,
+    sd.plus1 = historical.avg.5y + (historical.sd * 1),
+    sd.plus2 = historical.avg.5y + (historical.sd * 2),
+    sd.minus1 = historical.avg.5y - (historical.sd * 1),
+    sd.minus2 = historical.avg.5y - (historical.sd * 2)
+  )
+
+bf1.static %>% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, historical.avg.5y), size = 1, color = "red") +
+  geom_ribbon(aes(ymin = sd.minus1, ymax = sd.plus1), color = NA, fill = "red", alpha = 0.30, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = sd.minus2, ymax = sd.plus2), color = NA, fill = "red", alpha = 0.10, show.legend = FALSE) +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  labs(title = "Historical Forward Price-Earning Ratio of PSEI Members",
+       subtitle = "Static Average of Blended Current Fiscal Year Forward Estimates (1BF: 2018)",
+       x = "",
+       y = "Price-Earnings Ratio [X]") +
+  facet_wrap(~key, scales = "free_y", nrow = 4)
+```
+
+```{r, fig.width = 20, fig.height = 7, warning=FALSE}
+# Static average of blended forward estimates (2BF)
+bf2.static <- per2 %>% 
+  gather(key, value, -Date) %>% 
+  mutate(
+    value = replace(value, value == "#N/A N/A", NA) %>% as.numeric()
+  ) %>% 
+  spread(key, value) %>% 
+  select(Date, psei) %>% 
+  gather(key, value, -Date) %>% 
+  filter(
+    year(Date) >= last.5yrs
+    ) %>% 
+  group_by(key) %>% 
+  mutate(
+    historical.avg.5y = mean(value, na.rm = TRUE),
+    historical.sd = sd(value, na.rm = TRUE),
+    static.spread = value - historical.avg.5y,
+    sd.plus1 = historical.avg.5y + (historical.sd * 1),
+    sd.plus2 = historical.avg.5y + (historical.sd * 2),
+    sd.minus1 = historical.avg.5y - (historical.sd * 1),
+    sd.minus2 = historical.avg.5y - (historical.sd * 2)
+  )
+
+bf2.static %>% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, historical.avg.5y), size = 1, color = "red") +
+  geom_ribbon(aes(ymin = sd.minus1, ymax = sd.plus1), color = NA, fill = "red", alpha = 0.30, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = sd.minus2, ymax = sd.plus2), color = NA, fill = "red", alpha = 0.10, show.legend = FALSE) +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  labs(title = "Historical Forward Price-Earning Ratio of PSEI Members",
+       subtitle = "Static Average of Blended 1-Year Forward Estimates (2BF: 2019)",
+       x = "",
+       y = "Price-Earnings Ratio [X]") +
+  facet_wrap(~key, scales = "free_y", nrow = 4)
+```
+
+```{r, fig.width = 20, fig.height = 7, warning=FALSE}
+library(gridExtra)
+bf1.rolling.spread <- bf1.rolling %>% 
+  group_by(key) %>% 
+  slice(which.max(Date)) %>% 
+  mutate(bf1.spread = value - rolling.avg) %>% 
+  ggplot(aes(reorder(key, bf1.spread), bf1.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "5-Year Rolling mean Current Fiscal Year Price-Earnings Ratio",
+       x = "",
+       y = "Premium (Discount)")
+
+bf2.rolling.spread <- bf2.rolling %>% 
+  group_by(key) %>% 
+  slice(which.max(Date)) %>% 
+  mutate(bf2.spread = value - rolling.avg) %>% 
+  ggplot(aes(reorder(key, bf2.spread), bf2.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "5-Year Rolling mean 1-Year Forward Price-Earnings Ratio",
+       x = "",
+       y = "Premium (Discount)")
+
+bf1.static.spread <- bf1.static %>% 
+  group_by(key) %>% 
+  slice(which.max(Date)) %>% 
+  mutate(bf1.static.spread = value - historical.avg.5y) %>% 
+  ggplot(aes(reorder(key, bf1.static.spread), bf1.static.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "5-Year Static mean Current Fiscal Year Price-Earnings Ratio",
+       x = "",
+       y = "Premium (Discount)")
+
+bf2.static.spread <- bf2.static %>% 
+  group_by(key) %>% 
+  slice(which.max(Date)) %>% 
+  mutate(bf2.static.spread = value - historical.avg.5y) %>% 
+  ggplot(aes(reorder(key, bf2.static.spread), bf2.static.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = "5-Year Static mean 1-Year Forward Price-Earnings Ratio",
+       x = "",
+       y = "Premium (Discount)")
+
+grid.arrange(bf1.rolling.spread, bf2.rolling.spread,
+             bf1.static.spread, bf2.static.spread)
+``` 
+

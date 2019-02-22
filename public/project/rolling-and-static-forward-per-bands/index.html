@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Rolling and Static Forward PER Bands</title>
+        <style>
+
+    html body {
+        font-family: 'Mina', sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    :root {
+        --accent: #386890;
+        --border-width:  0 ;
+    }
+
+</style>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mina">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=VT323">
+
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/lakeside-light.min.css"> 
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+
+ 
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+    
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+
+<script>$(document).on('click', function() { $('.collapse').collapse('hide'); })</script>
+
+
+<script>
+$(document).ready(function(){
+    
+  var input = $('#night-mode-toggle');
+  var container = $('#bigbody');
+  var stat = $('#button-status');
+  
+  container.toggleClass(localStorage.toggled);
+  stat.bootstrapToggle(localStorage.button).change();
+  
+  input.on('click', function() {
+      if (localStorage.toggled != "-nightmode" ) {
+          container.toggleClass("-nightmode", true );
+          localStorage.toggled = "-nightmode";
+          localStorage.button = "on";
+       } else {
+          container.toggleClass("-nightmode", false );
+          localStorage.toggled = "";
+          localStorage.button = "off"
+       }
+  })
+});
+</script>
+ <meta name="generator" content="Hugo 0.54.0" />
+        
+        
+        
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133552770-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', 'UA-133552770-1');
+        </script>
+        
+
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/img/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/img/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    
+    
+    
+    <meta property="og:title" content="Rolling and Static Forward PER Bands">
+    <meta property="og:type" content="article">
+      
+      <meta name="twitter:card" content="summary">
+      <meta name="twitter:image" content="/favicon/birdmath.png" >
+      
+    <meta property="description" content="">
+    <meta property="og:description" content="">
+    
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:site" content="">
+    
+    </head>
+
+    
+    
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    
+
+    <body id = "bigbody">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand visible-xs" href="#">Rolling and Static Forward PER Bands</a>
+                    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    
+                        <ul class="nav navbar-nav">
+                            
+                                <li><a href="/">Home</a></li>
+                            
+                                <li><a href="/post/">Posts</a></li>
+                            
+                                <li><a href="/project/">Projects</a></li>
+                            
+                                <li><a href="/tags/">Tags</a></li>
+                            
+                        </ul>
+                    
+                    
+                        <ul class="nav navbar-nav navbar-right">
+                            
+                                <li class="navbar-icon"><a href="mailto:emcmunsayac@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://twitter.com/coco_not_martin/"><i class="fa fa-twitter"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://www.linkedin.com/in/emcmunsayac/"><i class="fa fa-linkedin"></i></a></li>
+                            
+                            <li id="night-mode-toggle">
+    <input type="checkbox" id = "button-status"
+        data-toggle="toggle"
+        data-width = "10"
+        data-height = "1"
+        data-on="<i class='fa fa-moon-o fa-lg' style='vertical-align:25%'></i>"
+        data-off= "<i class='fa fa-sun-o fa-lg' style='vertical-align:25%'></i>"
+        data-style="ios"
+        data-onstyle = "default">
+</li>
+                        </ul>
+                    
+                </div>
+            </div>
+        </nav>
+
+
+<main>
+
+    <div class="item">
+
+    
+    
+    
+
+    
+    
+      
+    
+
+    <h4><a href="/project/rolling-and-static-forward-per-bands/">Rolling and Static Forward PER Bands</a></h4>
+    <h5>February 22, 2019 - 5 minutes</h5>
+    <h5></h5>
+
+    
+
+        <a href="/categories/charting">
+        <kbd class="item-cat"> charting </kbd>
+    </a>
+    
+    
+    <a href="/tags/r">
+        <kbd class="item-tag"> R </kbd>
+    </a>
+    
+
+</div>
+
+
+    <br> <div class="text-justify">
+
+
+<pre class="r"><code># Rolling average of blended forward estimates (1BF)
+bf1.rolling &lt;-  per1 %&gt;% 
+  filter(
+    year(Date) &gt;= (last.5yrs-5)
+  ) %&gt;% 
+  select(Date, psei) %&gt;% 
+  gather(key, value, -Date) %&gt;% 
+  mutate(
+    value = replace(value, value == &quot;#N/A N/A&quot;, NA) %&gt;% as.numeric()
+  ) %&gt;% 
+  group_by(key) %&gt;% 
+  mutate(
+    rolling.avg = rollapplyr(value, FUN = mean, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sd = rollapplyr(value, FUN = sd, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sdplus1 = rolling.avg + (rolling.sd * 1),
+    rolling.sdplus2 = rolling.avg + (rolling.sd * 2),
+    rolling.sdminus1 = rolling.avg - (rolling.sd * 1),
+    rolling.sdminus2 = rolling.avg - (rolling.sd * 2)
+  ) %&gt;% 
+  na.omit() %&gt;% 
+  filter(
+    year(Date) &gt;= last.5yrs
+  )
+
+bf1.rolling %&gt;% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, rolling.avg), color = &quot;red&quot;, size = 1) +
+  geom_ribbon(aes(ymin = rolling.sdminus2, ymax = rolling.sdplus2), color = NA, fill = &quot;red&quot;, alpha = 0.10, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = rolling.sdminus1, ymax = rolling.sdplus1), color = NA, fill = &quot;red&quot;, alpha = 0.30, show.legend = FALSE) +
+  labs(title = &quot;Historical Forward Price-Earning Ratio of PSEI Members&quot;,
+       subtitle = &quot;Rolling Average of Blended Current Fiscal Year Forward Estimates (1BF: 2018)&quot;,
+       x = &quot;&quot;,
+       y = &quot;Price-Earnings Ratio [X]&quot;) +
+  facet_wrap(~key, scales = &quot;free_y&quot;, nrow = 4)</code></pre>
+<p><img src="/project/2019-02-22-rolling-and-static-forward-per-bands_files/figure-html/unnamed-chunk-2-1.png" width="1920" /></p>
+<pre class="r"><code># Rolling average of blended forward estimates (2BF)
+bf2.rolling &lt;- per2 %&gt;% 
+  filter(
+    year(Date) &gt;= (last.5yrs-5)
+  ) %&gt;% 
+  select(Date, psei) %&gt;% 
+  gather(key, value, -Date) %&gt;% 
+  mutate(
+    value = replace(value, value == &quot;#N/A N/A&quot;, NA) %&gt;% as.numeric()
+  ) %&gt;% 
+  group_by(key) %&gt;% 
+  mutate(
+    rolling.avg = rollapplyr(value, FUN = mean, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sd = rollapplyr(value, FUN = sd, width = 252 * 5, na.rm = TRUE, fill = NA),
+    rolling.sdplus1 = rolling.avg + (rolling.sd * 1),
+    rolling.sdplus2 = rolling.avg + (rolling.sd * 2),
+    rolling.sdminus1 = rolling.avg - (rolling.sd * 1),
+    rolling.sdminus2 = rolling.avg - (rolling.sd * 2)
+  ) %&gt;% 
+  na.omit() %&gt;% 
+  filter(
+    year(Date) &gt;= last.5yrs
+  )
+
+bf2.rolling %&gt;% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, rolling.avg), color = &quot;red&quot;, size = 1) +
+  geom_ribbon(aes(ymin = rolling.sdminus2, ymax = rolling.sdplus2), color = NA, fill = &quot;red&quot;, alpha = 0.10, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = rolling.sdminus1, ymax = rolling.sdplus1), color = NA, fill = &quot;red&quot;, alpha = 0.30, show.legend = FALSE) +
+  labs(title = &quot;Historical Forward Price-Earning Ratio of PSEI Members&quot;,
+       subtitle = &quot;Rolling Average of Blended 1-Year Forward Estimates (2BF: 2019)&quot;,
+       x = &quot;&quot;,
+       y = &quot;Price-Earnings Ratio [X]&quot;) +
+  facet_wrap(~key, scales = &quot;free_y&quot;, nrow = 4)</code></pre>
+<p><img src="/project/2019-02-22-rolling-and-static-forward-per-bands_files/figure-html/unnamed-chunk-3-1.png" width="1920" /></p>
+<pre class="r"><code># Static average of blended forward estimates (1BF)
+bf1.static &lt;- per1 %&gt;% 
+  gather(key, value, -Date) %&gt;% 
+  mutate(
+    value = replace(value, value == &quot;#N/A N/A&quot;, NA) %&gt;% as.numeric()
+  ) %&gt;% 
+  spread(key, value) %&gt;% 
+  select(Date, psei) %&gt;% 
+  gather(key, value, -Date) %&gt;% 
+  filter(
+    year(Date) &gt;= last.5yrs
+    ) %&gt;% 
+  group_by(key) %&gt;% 
+  mutate(
+    historical.avg.5y = mean(value, na.rm = TRUE),
+    historical.sd = sd(value, na.rm = TRUE),
+    static.spread = value - historical.avg.5y,
+    sd.plus1 = historical.avg.5y + (historical.sd * 1),
+    sd.plus2 = historical.avg.5y + (historical.sd * 2),
+    sd.minus1 = historical.avg.5y - (historical.sd * 1),
+    sd.minus2 = historical.avg.5y - (historical.sd * 2)
+  )
+
+bf1.static %&gt;% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, historical.avg.5y), size = 1, color = &quot;red&quot;) +
+  geom_ribbon(aes(ymin = sd.minus1, ymax = sd.plus1), color = NA, fill = &quot;red&quot;, alpha = 0.30, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = sd.minus2, ymax = sd.plus2), color = NA, fill = &quot;red&quot;, alpha = 0.10, show.legend = FALSE) +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  labs(title = &quot;Historical Forward Price-Earning Ratio of PSEI Members&quot;,
+       subtitle = &quot;Static Average of Blended Current Fiscal Year Forward Estimates (1BF: 2018)&quot;,
+       x = &quot;&quot;,
+       y = &quot;Price-Earnings Ratio [X]&quot;) +
+  facet_wrap(~key, scales = &quot;free_y&quot;, nrow = 4)</code></pre>
+<p><img src="/project/2019-02-22-rolling-and-static-forward-per-bands_files/figure-html/unnamed-chunk-4-1.png" width="1920" /></p>
+<pre class="r"><code># Static average of blended forward estimates (2BF)
+bf2.static &lt;- per2 %&gt;% 
+  gather(key, value, -Date) %&gt;% 
+  mutate(
+    value = replace(value, value == &quot;#N/A N/A&quot;, NA) %&gt;% as.numeric()
+  ) %&gt;% 
+  spread(key, value) %&gt;% 
+  select(Date, psei) %&gt;% 
+  gather(key, value, -Date) %&gt;% 
+  filter(
+    year(Date) &gt;= last.5yrs
+    ) %&gt;% 
+  group_by(key) %&gt;% 
+  mutate(
+    historical.avg.5y = mean(value, na.rm = TRUE),
+    historical.sd = sd(value, na.rm = TRUE),
+    static.spread = value - historical.avg.5y,
+    sd.plus1 = historical.avg.5y + (historical.sd * 1),
+    sd.plus2 = historical.avg.5y + (historical.sd * 2),
+    sd.minus1 = historical.avg.5y - (historical.sd * 1),
+    sd.minus2 = historical.avg.5y - (historical.sd * 2)
+  )
+
+bf2.static %&gt;% 
+  ggplot(aes(Date, value)) +
+  geom_line(size = 0.75, show.legend = FALSE) +
+  geom_line(inherit.aes = FALSE, aes(Date, historical.avg.5y), size = 1, color = &quot;red&quot;) +
+  geom_ribbon(aes(ymin = sd.minus1, ymax = sd.plus1), color = NA, fill = &quot;red&quot;, alpha = 0.30, show.legend = FALSE) +
+  geom_ribbon(aes(ymin = sd.minus2, ymax = sd.plus2), color = NA, fill = &quot;red&quot;, alpha = 0.10, show.legend = FALSE) +
+  scale_y_continuous(breaks = seq(0, 30, by = 2.5)) +
+  labs(title = &quot;Historical Forward Price-Earning Ratio of PSEI Members&quot;,
+       subtitle = &quot;Static Average of Blended 1-Year Forward Estimates (2BF: 2019)&quot;,
+       x = &quot;&quot;,
+       y = &quot;Price-Earnings Ratio [X]&quot;) +
+  facet_wrap(~key, scales = &quot;free_y&quot;, nrow = 4)</code></pre>
+<p><img src="/project/2019-02-22-rolling-and-static-forward-per-bands_files/figure-html/unnamed-chunk-5-1.png" width="1920" /></p>
+<pre class="r"><code>library(gridExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;gridExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<pre class="r"><code>bf1.rolling.spread &lt;- bf1.rolling %&gt;% 
+  group_by(key) %&gt;% 
+  slice(which.max(Date)) %&gt;% 
+  mutate(bf1.spread = value - rolling.avg) %&gt;% 
+  ggplot(aes(reorder(key, bf1.spread), bf1.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = &quot;5-Year Rolling mean Current Fiscal Year Price-Earnings Ratio&quot;,
+       x = &quot;&quot;,
+       y = &quot;Premium (Discount)&quot;)
+
+bf2.rolling.spread &lt;- bf2.rolling %&gt;% 
+  group_by(key) %&gt;% 
+  slice(which.max(Date)) %&gt;% 
+  mutate(bf2.spread = value - rolling.avg) %&gt;% 
+  ggplot(aes(reorder(key, bf2.spread), bf2.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = &quot;5-Year Rolling mean 1-Year Forward Price-Earnings Ratio&quot;,
+       x = &quot;&quot;,
+       y = &quot;Premium (Discount)&quot;)
+
+bf1.static.spread &lt;- bf1.static %&gt;% 
+  group_by(key) %&gt;% 
+  slice(which.max(Date)) %&gt;% 
+  mutate(bf1.static.spread = value - historical.avg.5y) %&gt;% 
+  ggplot(aes(reorder(key, bf1.static.spread), bf1.static.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = &quot;5-Year Static mean Current Fiscal Year Price-Earnings Ratio&quot;,
+       x = &quot;&quot;,
+       y = &quot;Premium (Discount)&quot;)
+
+bf2.static.spread &lt;- bf2.static %&gt;% 
+  group_by(key) %&gt;% 
+  slice(which.max(Date)) %&gt;% 
+  mutate(bf2.static.spread = value - historical.avg.5y) %&gt;% 
+  ggplot(aes(reorder(key, bf2.static.spread), bf2.static.spread, fill = key)) +
+  geom_col(show.legend = FALSE) +
+  labs(title = &quot;5-Year Static mean 1-Year Forward Price-Earnings Ratio&quot;,
+       x = &quot;&quot;,
+       y = &quot;Premium (Discount)&quot;)
+
+grid.arrange(bf1.rolling.spread, bf2.rolling.spread,
+             bf1.static.spread, bf2.static.spread)</code></pre>
+<p><img src="/project/2019-02-22-rolling-and-static-forward-per-bands_files/figure-html/unnamed-chunk-6-1.png" width="1920" /></p>
+</div>
+
+    
+    
+
+    
+
+        <h4 class="page-header">Related</h4>
+
+         <div class="item">
+
+    
+    
+    
+
+    
+    
+      
+    
+
+    <h4><a href="/2019/02/02/seasonality-trading-with-natgas/">Seasonality trading with NatGas</a></h4>
+    <h5>February 2, 2019 - 4 minutes</h5>
+    <h5></h5>
+
+    
+
+        <a href="/categories/backtesting">
+        <kbd class="item-cat"> Backtesting </kbd>
+    </a>
+    
+    
+    <a href="/tags/r">
+        <kbd class="item-tag"> R </kbd>
+    </a>
+    
+
+</div>
+ 
+
+    
+
+    
+
+</main>
+
+        <footer id = "bigfooter">
+            <div style = "padding:15px;">
+                <p>Powered by <a href="https://gohugo.io">Hugo</a>. Themed by <a href="https://github.com/nathancday/min_night">min_night</a>.
+                </p>
+                <a rel="license" href="https://creativecommons.org/licenses/by/4.0/"
+                title="Creative Commons Attribution 4.0 International license">
+                <i class="fa fa-creative-commons" aria-hidden="true"></i> Attribution 4.0 International license
+                </a>
+            </div>
+        </footer>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133552770-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', 'UA-133552770-1');
+        </script>
+       
+    </body>
+
+</html>
+

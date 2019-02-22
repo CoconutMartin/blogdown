@@ -132,7 +132,7 @@ large.cap <- work.set %>%
     yaxis = list(title = "Rolling Returns [%]",
                  font = list(family = "arial"),
                  showgrid = FALSE),
-    legend = list(font = list(family = "arial"))
+    legend = list(font = list(family = "arial", x = -1))
          )
 ```
 
