@@ -27,9 +27,9 @@ five.color <- c("#Ca0020", "#f4a582", "#b2182b", "#bababa", "#404040")
 
 cleaner <- function(x) {ifelse(is.nan(x) | is.infinite(x), NA, x)}
 
-v <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = ymd(Date))
-p <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = ymd(Date))
-m <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = ymd(Date))
+v <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = dmy(Date))
+p <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date))
+m <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = dmy(Date))
 ```
 
 ```{r, warning=FALSE, include=FALSE}
@@ -42,8 +42,10 @@ to <- v %>%
   gather(key, value, -Date) %>% 
   group_by(key) %>% 
   mutate(
+    value = ifelse(is.na(value), 0, value),
     turnover.median = runMedian(value, n = 21) / 1e6,
-    turnover.flag = ifelse(turnover.median > turnover.cutoff, 1, 0)) %>% 
+    turnover.flag = ifelse(turnover.median > turnover.cutoff, 1, 0)
+    ) %>% 
   select(Date, key, turnover.flag) %>% 
   spread(key, turnover.flag) %>% 
   tq_transmute(mutate_fun = to.period, period = "months") %>% 

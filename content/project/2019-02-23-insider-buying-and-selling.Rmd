@@ -1,0 +1,145 @@
+---
+title: Insider Buying and Selling
+author: Coconut Martin
+date: '2019-02-23'
+slug: insider-buying-and-selling
+categories:
+  - charting
+tags:
+  - R
+description: ''
+repo: ''
+weight: 0
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = FALSE)
+options(scipen = 999, digits = 2)
+
+library(tidyquant); library(plotly)
+
+theme_set(theme_tq() +
+            theme(panel.grid = element_blank(),
+                  plot.title = element_text(face = "bold", color = "#C00000")))
+
+
+five.color <- c("#Ca0020", "#f4a582", "#b2182b", "#bababa", "#404040")
+
+p <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date))
+m <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = dmy(Date))
+buy <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares weekly insider buying.csv") %>% mutate(Date = dmy(Date))
+sell <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares weekly insider selling.csv") %>% mutate(Date = dmy(Date))
+```
+
+```{r, fig.width = 8}
+set.seed(999)
+
+p.long <- p %>% 
+  gather(key, price, -Date)
+
+m.long <- m %>% 
+  gather(key, mcap, -Date)
+
+outstanding <- p.long %>% 
+  left_join(., m.long) %>% 
+  group_by(key) %>% 
+  mutate(
+    outstanding = (mcap / price) * 1e6
+  )
+
+buy.long <- buy %>% 
+  gather(key, buy.insider, -Date)
+
+sell.long <- sell %>% 
+  gather(key, sell.insider, -Date)
+
+net.insider <- buy.long %>% 
+  left_join(., sell.long) %>% 
+  left_join(., outstanding) %>% 
+  group_by(key) %>% 
+  mutate(
+    # clean insider value
+    buy.insider = replace(buy.insider, is.na(buy.insider), 0),
+    sell.insider = replace(sell.insider, is.na(sell.insider), 0),
+    # calculate rolling monthly net insider transaction
+    net.insider = buy.insider + sell.insider,
+    net.insider.rolling = runSum(net.insider, n = 4 * 3),
+    net.insider.as.outstanding = net.insider.rolling / outstanding
+  ) %>% 
+  group_by(key) %>% 
+  slice(which.max(Date)) %>% 
+  ungroup() %>% 
+  filter(net.insider.rolling != 0) %>% 
+  mutate(
+    insider.rank = rank(-net.insider.as.outstanding, ties.method = "random"),
+    insider.quantile = ntile(net.insider.as.outstanding, 5)
+  ) %>% 
+  filter(insider.rank < min(insider.rank) + 5 | insider.rank > max(insider.rank) - 5) 
+```
+
+```{r}
+net.insider %>% 
+  plot_ly(
+    x = ~reorder(key, -net.insider.as.outstanding),
+    y = ~round(net.insider.as.outstanding, 3) *100,
+    color = ~key,
+    colors = "Set1",
+    type = "bar"
+  ) %>% 
+  layout(title = "<b>Top Net Insider Transaction in the Last Three Months</b>",
+         titlefont = list(color = "#C00000", 
+                          family = "arial"),
+         yaxis = list(title = "Percent of Total Outstanding Shares [%]",
+                      titlefont = list(family = "arial"),
+                      showgrid = FALSE),
+         xaxis = list(title = "",
+                      titlefont = list(family = "arial")),
+         showlegend = FALSE)
+```
+
+```{r}
+insiders <- net.insider %>% 
+  select(key) %>% 
+  as.character() %>%
+  str_replace_all('\n|c|[[:punct:]]', '') %>%
+  strsplit(split = ' ') %>% 
+  unlist()
+
+buy.long %>% 
+  filter(key %in% insiders) %>% 
+  left_join(., sell.long) %>% 
+  left_join(., outstanding) %>% 
+  filter(year(Date) >= 2018) %>% 
+  group_by(key) %>% 
+  mutate(
+    # clean insider value
+    buy.insider = replace(buy.insider, is.na(buy.insider), 0),
+    sell.insider = replace(sell.insider, is.na(sell.insider), 0),
+    # calculate rolling monthly net insider transaction
+    net.insider = buy.insider + sell.insider,
+    net.insider.rolling = runSum(net.insider, n = 4 * 3),
+    net.insider.as.outstanding = net.insider.rolling / outstanding
+  ) %>% 
+  na.omit() %>% 
+  plot_ly(
+    x = ~Date,
+    y = ~round(net.insider.as.outstanding, 3) * 100,
+    color = ~key,
+    colors = "Set1",
+    type = "scatter",
+    mode = "lines"
+  ) %>% 
+  layout(title = "<b>Rolling Net Insider Transactions Over the Last Three Months</b>",
+         titlefont = list(color = "#C00000", 
+                          family = "arial"),
+         yaxis = list(title = "Percent of Total Outstanding Shares [%]",
+                      titlefont = list(family = "arial"),
+                      showgrid = FALSE),
+         xaxis = list(title = "",
+                      titlefont = list(family = "arial"),
+                      showgrid = FALSE),
+         legend = list(orientation = "h", x = 0.5),
+         showlegend = TRUE)
+
+```
+
