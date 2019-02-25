@@ -1,12 +1,12 @@
 ---
-title: Factor Returns in PH
+title: PH Factor Returns
 author: Coconut Martin
 date: '2019-02-26'
+slug: ph-factor-returns
 categories:
   - Backtesting
 tags:
   - R
-slug: factor-returns-in-ph
 ---
 
 Summary: 
