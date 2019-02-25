@@ -1,0 +1,13 @@
+---
+title: Website wont update
+author: ''
+date: '2019-02-26'
+slug: website-wont-update
+categories:
+  - Backtesting
+  - charting
+tags:
+  - R
+---
+
+Netlify wont update

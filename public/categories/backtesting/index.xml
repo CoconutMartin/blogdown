@@ -6,10 +6,19 @@
     <description>Recent content in Backtesting on Bird Math</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 02 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 26 Feb 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/backtesting/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Website wont update</title>
+      <link>/2019/02/26/website-wont-update/</link>
+      <pubDate>Tue, 26 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/02/26/website-wont-update/</guid>
+      <description>Netlify wont update</description>
+    </item>
     
     <item>
       <title>Seasonality trading with NatGas</title>
