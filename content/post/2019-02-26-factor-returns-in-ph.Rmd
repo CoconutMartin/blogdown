@@ -16,6 +16,8 @@ Summary:
 
 Action idea: Focus on volatile small caps with strong momentum during a market lull/downturn, probably overweight high PBV, high PER stocks to "reduce" volatility after the market turns. Short-term reversals should be ignored due to performance inconsistency. Lever up if possible to fully capitalize on the market upturn.
 
+Note: Quintile portfolio is rebalanced every month. Returns are gross of trading costs.
+
 ```{r setup, include=FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 options(digits = 3)
@@ -183,7 +185,7 @@ mcap.quintile.return <- quintile.return(stock.returns, mcap.quintile, "Size")
 reversal.quintile.return <- quintile.return(stock.returns, reversal.quintile, "ST Reversal")
 ```
 
-\n Momentum and size factors appears to be working the Philippine setting based on initial findings, with high momentum stocks outperforming low momentum stocks and low market cap outperforming high market caps. However, high price-to-book ratio, high price-to-earnings ratio, and high volatility stocks have outperformed their lower quintile counterparts, a contrast to established theories on factor investing where low multiples and low volatility stocks should be outperfoming their top quintile counterparts. Meanwhile, short-term reversal showed mixed results as both upper and lower quintiles tracked each other post-GFC. This only changed in 2016 where weak short-term momentum names outperformed high short-term momentum names, before switching places in 2017 to early 2018.
+Momentum and size factors appears to be working the Philippine setting based on initial findings, with high momentum stocks outperforming low momentum stocks and low market cap outperforming high market caps. However, high price-to-book ratio, high price-to-earnings ratio, and high volatility stocks have outperformed their lower quintile counterparts, a contrast to established theories on factor investing where low multiples and low volatility stocks should be outperfoming their top quintile counterparts. Meanwhile, short-term reversal showed mixed results as both upper and lower quintiles tracked each other post-GFC. This only changed in 2016 where weak short-term momentum names outperformed high short-term momentum names, before switching places in 2017 to early 2018.
 
 ```{r}
 # plot distribution of quintile spreads
@@ -232,7 +234,7 @@ factor.returns %>%
   subplot(nrows = NROW(.), shareX = TRUE, shareY = TRUE) 
 ```
 
-\n Size factor have performed the best since 2009, with spread between top and bottom quintiles contracted significantly in April 2014. However, spreads across factors contracted during 2014 due to [reasoning]. Factors recovered after dipping in 2014 except for volatility which only recovered in 2016. Meanwhile, all tested factors except for high PE stocks posted significant drawdowns from March 2018 as induced by non-stop foreign selling due to runaway inflation.
+Size factor have performed the best since 2009, with spread between top and bottom quintiles contracted significantly in April 2014. However, spreads across factors contracted during 2014 due to [reasoning]. Factors recovered after dipping in 2014 except for volatility which only recovered in 2016. Meanwhile, all tested factors except for high PE stocks posted significant drawdowns from March 2018 as induced by non-stop foreign selling due to runaway inflation.
 
 ```{r}
 # plot with plotly by passing a list
@@ -262,7 +264,7 @@ factor.returns %>%
   subplot(nrows = round(NROW(.)/1, 0), shareX = TRUE, shareY = TRUE)
 ```
 
-\n While strong correlation between strategies is not enough (for me) to dismiss a strategy, the major disappointment in this exercise is finding out that all strategies did not provide any diversification/protection from the market slowdown/downturn in 2014 and 2016. The unperformance could also be a function of universe limitation due to the required median value turnover (PhP20.0mn) over the last 21 trading days. While controlling for liquidity partly resolved strategy correlations, results remain in favor of higher liquidity cutoff given the higher maximum and current returns (not shown).
+While strong correlation between strategies is not enough (for me) to dismiss a strategy, the major disappointment in this exercise is finding out that all strategies did not provide any diversification/protection from the market slowdown/downturn in 2014 and 2016. The unperformance could also be a function of universe limitation due to the required median value turnover (PhP20.0mn) over the last 21 trading days. While controlling for liquidity partly resolved strategy correlations, results remain in favor of higher liquidity cutoff given the higher maximum and current returns (not shown).
 
 ```{r, warning=FALSE}
 bind.bnh <- buy.and.hold %>% 
@@ -314,13 +316,13 @@ combined.factor.returns %>%
     )
 ```
 
-\n Key take away(s): Focus on volatile small caps with strong momentum, probably overweight high PBV, high PER stocks to "reduce" volatility. Short-term reversals should be ignored due to performance inconsistency.
+Key take away(s): Focus on volatile small caps with strong momentum, probably overweight high PBV, high PER stocks to "reduce" volatility. Short-term reversals should be ignored due to performance inconsistency.
 
 ```{r}
 # Names of stocks in the fifth quintile
-fifth.quintile <- function(x, yr = 2019){
+n.quintile <- function(x, yr = 2019, q = 5){
   q.name = x %>% 
-    filter(year(Date) == yr, multiple.quintile == "Quintile 5") %>% 
+    filter(year(Date) == yr, multiple.quintile == paste0("Quintile ", q)) %>% 
     select(Date, key, value, multiple.quintile) %>%
     group_by(key) %>% 
     slice(which.max(Date)) %>% 
@@ -330,10 +332,10 @@ fifth.quintile <- function(x, yr = 2019){
   return(q.name)
 }
 
-mom.names <- mom.quintile %>% fifth.quintile()
-vol.names <- vol.quintile %>% fifth.quintile()
-per.names <- per.quintile %>% fifth.quintile()
-mbr.names <- mbr.quintile %>% fifth.quintile()
-mcap.names <- mcap.quintile %>% fifth.quintile()
+mom.names <- mom.quintile %>% n.quintile()
+vol.names <- vol.quintile %>% n.quintile()
+per.names <- per.quintile %>% n.quintile()
+mbr.names <- mbr.quintile %>% n.quintile()
+mcap.names <- mcap.quintile %>% n.quintile()
 ```
 
