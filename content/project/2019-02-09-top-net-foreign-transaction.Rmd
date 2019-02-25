@@ -16,7 +16,7 @@ weight: 0
 knitr::opts_chunk$set(echo=FALSE, message=FALSE)
 library(tidyquant); library(plotly)
 
-nft <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares nft.csv") %>% mutate(Date = dmy(Date))
+nft <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares nft.csv") %>% mutate(Date = dmy(Date))
 
 theme_set(theme_tq() +
             theme(panel.grid = element_blank()))

@@ -15,7 +15,7 @@ weight: 0
 ```{r, include=FALSE}
 library(tidyquant); library(plotly)
 knitr::opts_chunk$set(echo=FALSE, message=FALSE)
-x <- read.csv("C:/Users/Emille.PSC/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = ymd(Date))
+x <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = ymd(Date))
 ```
 
 ```{r, message=FALSE}
