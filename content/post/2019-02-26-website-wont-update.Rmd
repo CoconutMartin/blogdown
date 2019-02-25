@@ -10,4 +10,4 @@ tags:
   - R
 ---
 
-Netlify wont update
+Netlify wont update. Ugh.
