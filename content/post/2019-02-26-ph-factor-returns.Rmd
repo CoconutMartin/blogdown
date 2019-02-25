@@ -1,6 +1,6 @@
 ---
 title: PH Factor Returns
-author: Coconut Martin
+coverMeta: out
 date: '2019-02-26'
 slug: ph-factor-returns
 categories:
