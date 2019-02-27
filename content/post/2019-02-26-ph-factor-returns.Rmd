@@ -1,0 +1,345 @@
+---
+title: PH Factor Returns
+author: Coconut Martin
+date: '2019-02-26'
+slug: ph-factor-returns
+categories:
+  - Backtesting
+  - charting
+tags:
+  - R
+description: ''
+repo: ''
+weight: 0
+---
+
+Summary: 
+(1) Philippine stocks doest not seem to follow standard factor literature as high multiples and high volatility stocks outperform their bottom quintile counterparts. 
+(2) Momentum and size factors seem to work on Philippine stocks, with the latter generating the best annual rolling returns post-GFC. Size factor also seems to provide the best return after a market lull/downturn.
+(3) Standard factors in the Philippines does not seem to provide good portfolio diversification given the high correlation between strategies.
+
+Action idea: Focus on volatile small caps with strong momentum during a market lull/downturn, probably overweight high PBV, high PER stocks to "reduce" volatility after the market turns. Short-term reversals should be ignored due to performance inconsistency. Lever up if possible to fully capitalize on the market upturn.
+
+Note: Quintile portfolio is rebalanced every month. Returns are gross of trading costs.
+
+```{r setup, include=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+options(digits = 3)
+
+library(tidyquant); library(plotly); library(tibbletime); library(broom); library(sweep)
+
+p <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= 2000)
+to <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= 2000)
+per <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares per.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= 2000)
+pbv <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares pbv.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= 2000)
+mcap <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= 2000)
+
+# convert price to book to market to book ratio
+mbr <- data.frame(Date = pbv[, 1], lapply(pbv[, -1], FUN = function(x) 1 / x))
+```
+
+```{r}
+# PhP1.0mn median value turnover should be liquid enough for retail investors
+to.cutoff <- 20
+
+to.flag <- to %>% 
+  as_tbl_time(., index = Date) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    value = replace_na(value, 0) / 1e6,
+    value.rolling.median = runMedian(value, n = 21),
+    to.cutoff = ifelse(value.rolling.median >= to.cutoff, 1, NA)
+  ) %>% 
+  # tq_transmute is very slow when used on long form data, drops NA values making transformation problematic
+  # extract end of month figures by grouping by year and month, then extracting end date value with slice(which.max(Date))
+  # as_period is faster than tq_transmute and slice(which.max(Date))
+  as_period(., "1 month") %>% 
+  ungroup() %>% 
+  select(Date, key, to.cutoff)
+
+stock.returns <- p %>% 
+  as_tbl_time(., index = Date) %>% 
+  # tq_transmute is very slow when used on long form data, drops NA values making transformation problematic
+  # extract end of month figures by grouping by year and month, then extracting end date value with slice(which.max(Date))
+  # as_period is faster than tq_transmute and slice(which.max(Date))
+  as_period(., "1 month") %>% 
+  #group_by(year(Date), month(Date)) %>% 
+  #slice(which.max(Date)) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    period.chg = ROC(value, n = 1, type = "discrete") %>% replace(., is.nan(.) | is.na(.) | is.infinite(.), NA) %>% round(., 3)
+  ) %>% 
+  select(Date, key, period.chg)
+
+buy.and.hold <- stock.returns %>% 
+  filter(key == "PSEI") %>% 
+  mutate(
+    buy.and.hold = (rollapplyr(1 + period.chg, FUN = prod, width = 12, na.rm = TRUE, fill = NA) - 1) * 100,
+    buy.and.hold.cumm = cumprod(1 + period.chg)
+  ) %>% 
+  ungroup() %>% 
+  select(Date, buy.and.hold, buy.and.hold.cumm)
+```
+
+```{r, message=FALSE, echo=FALSE}
+# takes in a wide format dataframe
+.ntiled.fun <- function(x) {
+  .ntiled = x %>% 
+    select(-PSEI) %>% 
+    gather(key, value, -Date) %>% 
+    left_join(., to.flag) %>% 
+    group_by(key) %>% 
+    mutate(
+      value = value %>% lag(., 1),
+      value = value * to.cutoff
+    ) %>% 
+    group_by(Date) %>% 
+    mutate(
+      multiple.quintile = paste0("Quintile ", ntile(value, 5))
+    )
+  
+  return(.ntiled)
+}
+
+# Factor values are lagged to avoid look-ahead bias
+# rank stocks based on annual momentum
+mom.quintile <- p %>% 
+  select(-PSEI) %>% 
+  # tq_transmute is very slow when used on long form data, drops NA values making transformation problematic
+  # extract end of month figures by grouping by year and month, then extracting end date value with slice(which.max(Date))
+  # as_period is faster than tq_transmute and slice(which.max(Date))
+  as_tbl_time(., index = Date) %>% 
+  as_period(., "1 month") %>% 
+  #group_by(year(Date), month(Date)) %>% 
+  #slice(which.max(Date)) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    # calculate annual momentum as 12-month return
+    value = ((lag(value, 0) / lag(value, 6)) - 1) %>% replace(., is.nan(.) | is.na(.) | is.infinite(.), NA) %>% lag(., 1)
+  ) %>% 
+  select(Date, key, value) %>% 
+  left_join(., to.flag) %>% 
+  group_by(Date) %>% 
+  mutate(
+    value = value * to.cutoff,
+    multiple.quintile = paste0("Quintile ", ntile(value, 5))
+  )
+
+# rank stocks based on 3-month return volatility
+vol.quintile <- stock.returns %>% 
+  filter(key != "PSEI") %>% 
+  group_by(key) %>% 
+  mutate(
+    period.chg = period.chg %>% replace_na(., 0),
+    value = runSD(period.chg, n = 3) %>% lag(., 1)
+  ) %>% 
+  select(Date, key, value) %>%
+  left_join(., to.flag) %>% 
+  group_by(Date) %>% 
+  mutate(
+    value = value * to.cutoff,
+    multiple.quintile = paste0("Quintile ", ntile(value, 5))
+  )
+
+# rank stocks based on per
+per.quintile <- per %>% .ntiled.fun()
+# rank stocks based on pbv
+mbr.quintile <- pbv %>% .ntiled.fun()
+# rank stocks based on market cap
+mcap.quintile <- mcap %>% .ntiled.fun()
+# short-term reversal
+reversal.quintile <- stock.returns %>% group_by(key) %>% 
+  # lag monthly returns to avoid look-ahead bias
+  mutate(period.chg = lag(period.chg)) %>% 
+  spread(key, period.chg) %>% 
+  .ntiled.fun()
+# rank stocks based on beta
+#beta.quintile <- slope.df %>% spread(key, slope) %>% select(-period.chg) %>% .ntiled.fun()
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Calculate factor returns per quintile
+quintile.return <- function(x = "stock returns", y = "factor quintile", z = "factor name") {
+  factor.quintile.return = x %>% 
+  left_join(., y) %>% 
+  filter(
+    multiple.quintile != "Quintile NA" 
+  ) %>% 
+  group_by(Date, multiple.quintile) %>% 
+  summarise(
+    quintile.avg.return = mean(period.chg, na.rm = TRUE) %>% replace(., is.nan(.) | is.infinite(.), 0)
+  ) %>% 
+  ungroup() %>%
+  group_by(multiple.quintile) %>% 
+  mutate(
+    cummulative.return = (cumprod(1 + quintile.avg.return) - 1) * 100,
+    annual.rolling.return = (rollapplyr(1 + quintile.avg.return, FUN = prod, width = 12, na.rm = TRUE, fill = NA) - 1) * 100,
+    Factor = z
+  ) 
+}
+
+mom.quintile.return <- quintile.return(stock.returns, mom.quintile, "Momentum")
+per.quintile.return <- quintile.return(stock.returns, per.quintile, "PE Ratio")
+mbr.quintile.return <- quintile.return(stock.returns, mbr.quintile, "PBV Ratio")
+vol.quintile.return <- quintile.return(stock.returns, vol.quintile, "Volatility")
+mcap.quintile.return <- quintile.return(stock.returns, mcap.quintile, "Size")
+reversal.quintile.return <- quintile.return(stock.returns, reversal.quintile, "ST Reversal")
+```
+
+Momentum and size factors appears to be working the Philippine setting based on initial findings, with high momentum stocks outperforming low momentum stocks and low market cap outperforming high market caps. However, high price-to-book ratio, high price-to-earnings ratio, and high volatility stocks have outperformed their lower quintile counterparts, a contrast to established theories on factor investing where low multiples and low volatility stocks should be outperfoming their top quintile counterparts. Meanwhile, short-term reversal showed mixed results as both upper and lower quintiles tracked each other post-GFC. This only changed in 2016 where weak short-term momentum names outperformed high short-term momentum names, before switching places in 2017 to early 2018.
+
+```{r}
+# plot distribution of quintile spreads
+factor.returns <- bind_rows(as.data.frame(mcap.quintile.return), as.data.frame(mbr.quintile.return), 
+          as.data.frame(vol.quintile.return), as.data.frame(mom.quintile.return), 
+          as.data.frame(per.quintile.return), as.data.frame(reversal.quintile.return)) %>% 
+  filter(year(Date) >= 2009) %>% 
+  mutate(
+    Factor = factor(Factor, levels = unique(Factor))
+  )
+
+factor.returns %>% 
+  select(-c(quintile.avg.return, cummulative.return)) %>% 
+  spread(multiple.quintile, annual.rolling.return) %>% 
+  group_by(Factor) %>% 
+  mutate(
+    q1.q5.spread = `Quintile 5` - `Quintile 1`
+  ) %>% 
+  select(Date, Factor, q1.q5.spread) %>% 
+  #filter(year(Date) >= 2009) %>% 
+  split(.$Factor) %>% 
+  lapply(
+    function(d) plot_ly(d,
+                        #x = ~Date,
+                        x = ~q1.q5.spread,
+                        color = ~Factor,
+                        type = "histogram",
+                        xbins = list(size = 1),
+                        showlegend = FALSE,
+                        height = 500
+                        ) %>% 
+      layout(
+        title = "<b>Distribution of Rolling Quintile Performance Post-GFC</b>",
+        titlefont = list(family = "arial",
+                         color = "#C00000"),
+        yaxis = list(title = ~Factor,
+                     titlefont = list(family = "arial",
+                                      size = 12),
+                     showgrid = FALSE),
+        xaxis = list(title = "Spread between Fifth and First Quintiles in Basis Points",
+                     titlefont = list(family = "arial"),
+                     showgrid = FALSE),
+        legend = list(titlefont = list(family = "arial"))
+      )
+  ) %>% 
+  subplot(nrows = NROW(.), shareX = TRUE, shareY = TRUE) 
+```
+
+Size factor have performed the best since 2009, with spread between top and bottom quintiles contracted significantly in April 2014. However, spreads across factors contracted during 2014 due to [reasoning]. Factors recovered after dipping in 2014 except for volatility which only recovered in 2016. Meanwhile, all tested factors except for high PE stocks posted significant drawdowns from March 2018 as induced by non-stop foreign selling due to runaway inflation.
+
+```{r}
+# plot with plotly by passing a list
+factor.returns %>% 
+  filter(multiple.quintile %in% c("Quintile 1", "Quintile 5")) %>% 
+  split(.$Factor) %>% 
+  lapply(
+    function(d) plot_ly(d, x = ~Date, y = ~annual.rolling.return, 
+                        color = ~multiple.quintile, colors = c('#C00000', '#fc8d59', '#1a9850', '#91bfdb','#4575b4'),
+                        type = "scatter", mode = "lines",
+                        legendgroup = ~multiple.quintile,
+                        height = 500) %>% 
+      layout(
+        title = "<b>Rolling Annual Returns of Factor Quintiles</b>",
+        titlefont = list(family = "arial",
+                         color = "#C00000"),
+        yaxis = list(title = ~Factor,
+                     titlefont = list(family = "arial",
+                                      size = 12),
+                     showgrid = FALSE),
+        xaxis = list(title = "Rolling Annual Returns [%]",
+                     titlefont = list(family = "arial"),
+                     showgrid = FALSE),
+        legend = list(titlefont = list(family = "arial"))
+      )
+  ) %>% 
+  subplot(nrows = round(NROW(.)/1, 0), shareX = TRUE, shareY = TRUE)
+```
+
+While strong correlation between strategies is not enough (for me) to dismiss a strategy, the major disappointment in this exercise is finding out that all strategies did not provide any diversification/protection from the market slowdown/downturn in 2014 and 2016. The unperformance could also be a function of universe limitation due to the required median value turnover (PhP20.0mn) over the last 21 trading days. While controlling for liquidity partly resolved strategy correlations, results remain in favor of higher liquidity cutoff given the higher maximum and current returns (not shown).
+
+```{r, warning=FALSE}
+bind.bnh <- buy.and.hold %>% 
+  filter(year(Date) >= 2009) %>% 
+  rename(
+    cummulative.return = buy.and.hold.cumm,
+    annual.rolling.return = buy.and.hold     
+         ) %>% 
+  mutate(
+    multiple.quintile = "Buy and Hold",  
+    quintile.avg.return = NA,
+    Factor = "Buy and Hold",
+    include = 1
+  ) %>% 
+  select(Date, multiple.quintile, quintile.avg.return, cummulative.return, annual.rolling.return, Factor, include) %>% 
+  as.data.frame()
+
+combined.factor.returns <- factor.returns %>% 
+  mutate(
+    include = ifelse(Factor == "Size" & multiple.quintile == "Quintile 1", 1,
+                     ifelse(Factor != "Size" & multiple.quintile == "Quintile 5", 1, 0))
+  ) %>% 
+  filter(include == 1) %>% 
+  bind_rows(bind.bnh) %>% 
+  mutate(Factor = factor(Factor, levels = unique(Factor)))
+
+combined.factor.returns %>% 
+  plot_ly(x = ~Date, y = ~annual.rolling.return, 
+          color = ~Factor, colors = c('#C00000', '#fc8d59', '#1a9850', '#91bfdb','#4575b4'),
+          type = "scatter", mode = "lines",
+          height = 450) %>% 
+  layout(
+    title = "<b>Rolling Annual Returns of Top Factor Quintiles</b>",
+    titlefont = list(family = "arial",
+                     color = "#C00000"),
+    yaxis = list(title = ~Factor,
+                 titlefont = list(family = "arial",
+                                  size = 12),
+                 showgrid = FALSE),
+    xaxis = list(title = "Rolling Annual Returns [%]",
+                 titlefont = list(family = "arial"),
+                 showgrid = FALSE),
+    legend = list(titlefont = list(family = "arial")),
+    annotations = 
+      list(x = 0.7, y = 1, text = "<i>Note: Size refers to bottom quintile</i>", 
+           showarrow = F, xref='paper', yref='paper', 
+           xanchor='right', yanchor='auto', xshift=0, yshift=0,
+           font=list(size=12, color="grey70", family = "arial"))
+    )
+```
+
+Key take away(s): Focus on volatile small caps with strong momentum, probably overweight high PBV, high PER stocks to "reduce" volatility. Short-term reversals should be ignored due to performance inconsistency.
+
+```{r}
+# Names of stocks in the fifth quintile
+n.quintile <- function(x, yr = 2019, q = 5){
+  q.name = x %>% 
+    filter(year(Date) == yr, multiple.quintile == paste0("Quintile ", q)) %>% 
+    select(Date, key, value, multiple.quintile) %>%
+    group_by(key) %>% 
+    slice(which.max(Date)) %>% 
+    arrange(Date) %>% 
+    as.data.frame()
+  
+  return(q.name)
+}
+
+mom.names <- mom.quintile %>% n.quintile()
+vol.names <- vol.quintile %>% n.quintile()
+per.names <- per.quintile %>% n.quintile()
+mbr.names <- mbr.quintile %>% n.quintile()
+mcap.names <- mcap.quintile %>% n.quintile()
+```
+
