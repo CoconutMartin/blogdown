@@ -2,30 +2,30 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Bird Math</title>
-    <link>https://birdmath.netlify.com/categories/</link>
+    <link>/categories/</link>
     <description>Recent content in Categories on Bird Math</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 26 Feb 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://birdmath.netlify.com/categories/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Backtesting</title>
-      <link>https://birdmath.netlify.com/categories/backtesting/</link>
+      <link>/categories/backtesting/</link>
       <pubDate>Tue, 26 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://birdmath.netlify.com/categories/backtesting/</guid>
+      <guid>/categories/backtesting/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Charting</title>
-      <link>https://birdmath.netlify.com/categories/charting/</link>
-      <pubDate>Tue, 26 Feb 2019 00:00:00 +0000</pubDate>
+      <link>/categories/charting/</link>
+      <pubDate>Sat, 23 Feb 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://birdmath.netlify.com/categories/charting/</guid>
+      <guid>/categories/charting/</guid>
       <description></description>
     </item>
     

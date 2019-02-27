@@ -5,7 +5,6 @@ date: '2019-02-26'
 slug: ph-factor-returns
 categories:
   - Backtesting
-  - charting
 tags:
   - R
 description: ''
@@ -21,6 +20,9 @@ Summary:
 Action idea: Focus on volatile small caps with strong momentum during a market lull/downturn, probably overweight high PBV, high PER stocks to "reduce" volatility after the market turns. Short-term reversals should be ignored due to performance inconsistency. Lever up if possible to fully capitalize on the market upturn.
 
 Note: Quintile portfolio is rebalanced every month. Returns are gross of trading costs.
+
+Momentum and size factors appears to be working the Philippine setting based on initial findings, with high momentum stocks outperforming low momentum stocks and low market cap outperforming high market caps. However, high price-to-book ratio, high price-to-earnings ratio, and high volatility stocks have outperformed their lower quintile counterparts, a contrast to established theories on factor investing where low multiples and low volatility stocks should be outperfoming their top quintile counterparts. Meanwhile, short-term reversal showed mixed results as both upper and lower quintiles tracked each other post-GFC. This only changed in 2016 where weak short-term momentum names outperformed high short-term momentum names, before switching places in 2017 to early 2018.
+<br>
 
 ```{r setup, include=FALSE, warning = FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
@@ -189,10 +191,6 @@ mcap.quintile.return <- quintile.return(stock.returns, mcap.quintile, "Size")
 reversal.quintile.return <- quintile.return(stock.returns, reversal.quintile, "ST Reversal")
 ```
 
-<br>
-Momentum and size factors appears to be working the Philippine setting based on initial findings, with high momentum stocks outperforming low momentum stocks and low market cap outperforming high market caps. However, high price-to-book ratio, high price-to-earnings ratio, and high volatility stocks have outperformed their lower quintile counterparts, a contrast to established theories on factor investing where low multiples and low volatility stocks should be outperfoming their top quintile counterparts. Meanwhile, short-term reversal showed mixed results as both upper and lower quintiles tracked each other post-GFC. This only changed in 2016 where weak short-term momentum names outperformed high short-term momentum names, before switching places in 2017 to early 2018.
-<br>
-
 ```{r}
 # plot distribution of quintile spreads
 factor.returns <- bind_rows(as.data.frame(mcap.quintile.return), as.data.frame(mbr.quintile.return), 
@@ -227,7 +225,6 @@ factor.returns %>%
         title = "<b>Distribution of Rolling Quintile Performance Post-GFC</b>",
         titlefont = list(family = "arial",
                          color = "#C00000"),
-        automargin = TRUE
         yaxis = list(title = ~Factor,
                      titlefont = list(family = "arial",
                                       size = 12),

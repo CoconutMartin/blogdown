@@ -3,94 +3,89 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://birdmath.netlify.com/2019/02/26/ph-factor-returns/</loc>
+    <loc>/2019/02/26/ph-factor-returns/</loc>
     <lastmod>2019-02-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/2019/02/26/website-wont-update/</loc>
-    <lastmod>2019-02-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://birdmath.netlify.com/project/insider-buying-and-selling/</loc>
+    <loc>/project/insider-buying-and-selling/</loc>
     <lastmod>2019-02-23T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/project/rolling-and-static-forward-per-bands/</loc>
+    <loc>/project/rolling-and-static-forward-per-bands/</loc>
     <lastmod>2019-02-22T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/project/rolling-annual-returns-per-return-quantile/</loc>
+    <loc>/project/rolling-annual-returns-per-return-quantile/</loc>
     <lastmod>2019-02-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/project/top-net-foreign-transaction/</loc>
+    <loc>/project/top-net-foreign-transaction/</loc>
     <lastmod>2019-02-09T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/project/psei-rolling-annual-returns/</loc>
+    <loc>/project/psei-rolling-annual-returns/</loc>
     <lastmod>2019-02-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/project/psei-trading-range/</loc>
+    <loc>/project/psei-trading-range/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/2019/02/02/seasonality-trading-with-natgas/</loc>
+    <loc>/2019/02/02/seasonality-trading-with-natgas/</loc>
     <lastmod>2019-02-02T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/categories/backtesting/</loc>
+    <loc>/categories/backtesting/</loc>
     <lastmod>2019-02-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/</loc>
+    <loc>/</loc>
     <lastmod>2019-02-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/categories/</loc>
+    <loc>/categories/</loc>
     <lastmod>2019-02-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/categories/charting/</loc>
-    <lastmod>2019-02-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://birdmath.netlify.com/post/</loc>
-    <lastmod>2019-02-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://birdmath.netlify.com/project/</loc>
+    <loc>/categories/charting/</loc>
     <lastmod>2019-02-23T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/tags/r/</loc>
+    <loc>/post/</loc>
     <lastmod>2019-02-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://birdmath.netlify.com/tags/</loc>
+    <loc>/project/</loc>
+    <lastmod>2019-02-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2019-02-26T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
     <lastmod>2019-02-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
