@@ -1,0 +1,180 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message = FALSE)
+
+library(tidyquant); library(tibbletime); library(timetk); library(forecast); library(plotly); library(caret); library(anomalize)
+y <- read.csv("C:/Users/Martin/Google Drive/7. Datasets/inflation exercise.csv")
+
+theme_set(theme_tq() +
+            theme(panel.grid = element_blank()))
+```
+
+```{r, warning = FALSE}
+inflation.set <- y %>% mutate(Date = dmy(Date)) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>%
+  mutate(
+    # lag predictor variables to avoid look-ahead bias
+    chg = ROC(value, n = 12, type = "discrete") * 100
+  ) %>% 
+  select(-value) %>% 
+  spread(key, chg) %>% 
+  na.omit() %>% 
+  as_tbl_time(., index = Date)
+
+inflation.set %>% 
+  gather(key, value, -Date, -cpi.all) %>% 
+  ggplot(aes(value, cpi.all, color = key)) +
+  geom_point() +
+  labs(title = "Relationship between PH inflation, dubai crude, and regular rice") +
+  guides(color = FALSE) +
+  facet_wrap(~key, scales = "free") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+yr.cut <- 2016
+# Breakdown training timeseries set
+inflation.train <- inflation.set %>% 
+  filter(year(Date) <= yr.cut) %>% 
+  gather(key, value, -Date) %>% 
+  nest(-key) %>% 
+  # decompse trend, seasonality, and error of time series
+  mutate(x.decomp = map(data, ~time_decompose(value, method = "stl", data = .x))) %>% 
+  unnest(x.decomp) %>% 
+  gather(key2, value, -c(Date, key)) %>% 
+  mutate(key = paste0(key, ".", key2)) %>% 
+  select(-key2) %>% 
+  spread(key, value) %>% 
+  # lag all variables except target (cpi.all.observed) to avoid look-ahead bias
+  gather(key, value, -Date, -cpi.all.observed) %>% 
+  group_by(key) %>% 
+  mutate(value = lag(value, 1)) %>% 
+  na.omit() %>% 
+  spread(key, value)
+```
+
+```{r, fig.width=8, message=FALSE}
+inflation.set %>% 
+  filter(year(Date) <= yr.cut) %>% 
+  gather(key, value, -Date) %>% 
+  nest(-key) %>% 
+  # decompse trend, seasonality, and error of time series
+  mutate(x.decomp = map(data, ~time_decompose(value, method = "stl", data = .x))) %>% 
+  unnest(x.decomp) %>% 
+  gather(key2, value, -c(Date, key)) %>% 
+  mutate(key2 = factor(key2, levels = unique(key2))) %>% 
+  ggplot(aes(Date, value, color = key2)) +
+  geom_line(size = 1, show.legend = FALSE) +
+  facet_grid(key~key2, scales = "free_y", switch = "y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+```{r}
+# Breakdown testing timeseries set
+inflation.test <- inflation.set %>% 
+  filter(year(Date) > yr.cut) %>% 
+  gather(key, value, -Date) %>% 
+  nest(-key) %>% 
+  # decompse trend, seasonality, and error of time series
+  mutate(x.decomp = map(data, ~time_decompose(value, method = "stl", data = .x))) %>% 
+  unnest(x.decomp) %>% 
+  gather(key2, value, -c(Date, key)) %>% 
+  mutate(key = paste0(key, ".", key2)) %>% 
+  select(-key2) %>% 
+  spread(key, value) %>% 
+  gather(key, value, -Date, -cpi.all.observed) %>% 
+  group_by(key) %>% 
+  # lag all variables except target (cpi.all.observed) to avoid look-ahead bias
+  mutate(value = lag(value, 1)) %>% 
+  na.omit() %>% 
+  spread(key, value)
+```
+
+```{r}
+form <- cpi.all.observed ~ . -Date -dubai.crude.trend -regular.rice.trend -dubai.crude.season -regular.rice.observed -regular.rice.season 
+inflation.lm <- lm(form, data = inflation.train)
+summary(inflation.lm)
+```
+
+```{r, echo=FALSE, include=FALSE}
+# Forecast inflation with simple linear model
+inflation.test$lm.pred <- predict(inflation.lm, inflation.test)
+
+# Forecast with random forest
+inflation.ranger <- train(form, data = inflation.train, method = "ranger")
+inflation.test$ranger.pred <- predict(inflation.ranger, inflation.test)
+
+# Forecast with svmLinear
+inflation.svm <- train(form, data = inflation.train, method = "svmLinear")
+inflation.test$svm.pred <- predict(inflation.svm, inflation.test)
+
+# Forecast with xgbLinear
+inflation.xgbln <- train(form, data = inflation.train, method = "xgbLinear")
+inflation.test$xgbln.pred <- predict(inflation.xgbln, inflation.test)
+
+# Forecast with xgbTree
+inflation.xgbtree <- train(form, data = inflation.train, method = "xgbTree")
+inflation.test$xgbtree.pred <- predict(inflation.xgbtree, inflation.test)
+```
+
+```{r, warning=FALSE}
+(err <- inflation.test %>% 
+   select(Date, cpi.all.observed, lm.pred, ranger.pred, svm.pred, xgbln.pred, xgbtree.pred) %>% 
+   rename("OLS" = "lm.pred", "Random Forest" = "ranger.pred", "Support Vector Machine" = "svm.pred", "Boosted Linear" = "xgbln.pred", "Boosted Tree" = "xgbtree.pred") %>% 
+   gather(key, value, -Date, -cpi.all.observed) %>% 
+   group_by(Date) %>%  
+   mutate(`Model Average` = mean(value, na.rm = TRUE)) %>%
+   spread(key, value) %>% 
+   gather(key, value, -Date, -cpi.all.observed) %>% 
+   group_by(key) %>%
+   mutate(
+     err = cpi.all.observed - value
+   ) %>% 
+   rename("Model" = key) %>% 
+   summarise(
+     `Root Mean Squared Error (bps)` = sqrt(mean(err^2)) %>% round(., 3) * 100,
+     `Mean Absolute Error (bps)` = mean(abs(err)) %>% round(., 3) * 100
+   ))
+```
+```{r, warning=FALSE}
+inflation.test %>% 
+  select(Date, cpi.all.observed, lm.pred, ranger.pred, svm.pred, xgbln.pred, xgbtree.pred) %>% 
+  group_by(Date) %>%  
+  gather(key, value, -Date) %>% 
+  mutate(model.avg = mean(value, na.rm = TRUE)) %>%
+  spread(key, value) %>% 
+  rename("Inflation Rate" = "cpi.all.observed", "Model Averages" = "model.avg", "OLS" = "lm.pred", 
+         "Random Forest" = "ranger.pred", "Support Vector Machine" = "svm.pred", "Boosted Linear" = "xgbln.pred", "Boosted Tree" = "xgbtree.pred") %>% 
+  ungroup() %>% 
+  gather(key, value, -Date) %>% 
+  plot_ly(
+    x = ~Date,
+    y = ~value,
+    color = ~key,
+    type = "scatter",
+    mode = "lines"
+  ) %>% 
+  layout(
+    #title = "<b>Inflation Rate as a Function of Error, Trend, and Seasonality of \nPrevious Month's Inflation Rate, Dubai Crude, and Rice Prices</b>",
+    title = "<b>Inflation Rate as a Function of Previous Month's Inflation Rate, Dubai Crude, and Rice Prices, \nalong with the variable's Error, Trend, and Seasonality<b>",
+    titlefont = list(family = "Arial",
+                     size = 15,
+                     color = "#C00000"),
+    yaxis = list(title = "<b>Inflation Rate [%]</b>",
+                 showgrid = TRUE,
+                 titlefont = list(family = "Arial",
+                                  size = 12,
+                                  color = "#C00000"),
+                 range = c(0, 8)),
+    xaxis = list(title = "",
+                 showgrid = FALSE), 
+    legend = list(font = list(family = "Arial",
+                              size = 12))
+  )
+```
+

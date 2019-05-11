@@ -1,0 +1,421 @@
+---
+title: PH Factor Returns
+author: Coconut Martin
+date: '2019-03-15'
+slug: ph-factor-returns
+categories:
+  - Backtesting
+tags:
+  - R
+description: ''
+repo: ''
+weight: 0
+---
+
+```{r setup, include=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+options(digits = 3)
+
+library(tidyquant); library(plotly); library(tibbletime); library(broom); library(sweep); library(data.table)
+
+# Date cutoff
+yr.cut <- 2000
+
+p <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+to <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+per <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares per.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+pbv <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares pbv.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+mcap <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+roe <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares roe.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+roa <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares roa.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+beta <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares beta.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+tp <- fread("C:/Users/Martin/Google Drive/7. Datasets/all shares tp.csv") %>% mutate(Date = dmy(Date)) %>% filter(year(Date) >= yr.cut)
+
+basic.color <- c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928')
+
+# convert price to book to market to book ratio
+mbr <- data.frame(Date = pbv[, 1], lapply(pbv[, -1], FUN = function(x) 1 / x))
+```
+
+
+```{r}
+# PhP1.0mn median value turnover should be liquid enough for retail investors
+to.cutoff <- 10
+
+to.flag <- to %>% 
+  as_tbl_time(., index = Date) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    value = replace_na(value, 0) / 1e6,
+    value.rolling.median = runMedian(value, n = 21),
+    to.cutoff = ifelse(value.rolling.median >= to.cutoff, 1, NA)
+  ) %>% 
+  # tq_transmute is very slow when used on long form data, drops NA values making transformation problematic
+  # extract end of month figures by grouping by year and month, then extracting end date value with slice(which.max(Date))
+  # as_period is faster than tq_transmute and slice(which.max(Date))
+  as_period(., "1 month") %>% 
+  ungroup() %>% 
+  select(Date, key, to.cutoff)
+
+stock.returns <- p %>% 
+  as_tbl_time(., index = Date) %>% 
+  # tq_transmute is very slow when used on long form data, drops NA values making transformation problematic
+  # extract end of month figures by grouping by year and month, then extracting end date value with slice(which.max(Date))
+  # as_period is faster than tq_transmute and slice(which.max(Date))
+  as_period(., "1 month") %>% 
+  #group_by(year(Date), month(Date)) %>% 
+  #slice(which.max(Date)) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    period.chg = ROC(value, n = 1, type = "discrete") %>% replace(., is.nan(.) | is.na(.) | is.infinite(.), NA) %>% round(., 3)
+  ) %>% 
+  select(Date, key, period.chg)
+
+buy.and.hold <- stock.returns %>% 
+  filter(key == "PCOMP") %>% 
+  mutate(
+    buy.and.hold = (rollapplyr(1 + period.chg, FUN = prod, width = 12, na.rm = TRUE, fill = NA) - 1) * 100,
+    buy.and.hold.cumm = cumprod(1 + replace_na(period.chg, 0)) - 1
+  ) %>% 
+  ungroup() %>% 
+  select(Date, buy.and.hold, buy.and.hold.cumm)
+
+```
+
+```{r}
+# calculate momentum factor
+mom <- p %>% 
+  as_tbl_time(., index = Date) %>% 
+  as_period(., "1 month") %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    value = ((lag(value, 0) / lag(value, 6)) - 1) %>% replace(., is.nan(.) | is.infinite(.), NA) %>% lag(., 1) 
+  ) %>% 
+  spread(key, value)
+
+# calculate long-term momentum factor (5 years)
+lt.mom <- p %>% 
+  as_tbl_time(., index = Date) %>% 
+  as_period(., "1 month") %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    value = ((lag(value, 0) / lag(value, 60)) - 1) %>% replace(., is.nan(.) | is.infinite(.), NA) %>% lag(., 1) 
+  ) %>% 
+  spread(key, value)
+
+# calculate volatility factor
+vol <- p %>% 
+  as_tbl_time(., index = Date) %>% 
+  as_period(., "1 month") %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    value = ((lag(value, 0) / lag(value, 1)) - 1) %>% replace(., is.nan(.) | is.infinite(.), NA) %>% lag(., 1),
+    value = rollapplyr(value, FUN = sd, width = 6, na.rm = TRUE, fill = NA)
+  ) %>% 
+  spread(key, value)
+
+# TP revisions
+tp <- tp %>% 
+  as_tbl_time(., index = Date) %>% 
+  as_period(., "1 month") %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    value = ((lag(value, 0) / lag(value, 3)) - 1) %>% replace(., is.nan(.) | is.infinite(.), NA) %>% lag(., 1)
+  ) %>% 
+  spread(key, value)
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Specify rebalancing period 
+rebal.period <- "1 months"
+
+# N-tile ranking function that takes in a wide format dataframe
+.ntiled.fun <- function(x) {
+  .ntiled = x %>% 
+    as_tbl_time(., index = Date) %>% 
+    select(-PCOMP) %>% 
+    gather(key, value, -Date) %>% 
+    left_join(., to.flag) %>% 
+    group_by(key) %>% 
+    mutate(
+      # picks best/worst in class as of previous month's ending date
+      # picks are lagged by 1 period to avoid-look ahead bias
+      value = value %>% lag(., 1),
+      value = value * to.cutoff
+    ) %>% 
+    group_by(Date) %>% 
+    mutate(
+      multiple.quintile = paste0("Quintile ", ntile(value, 5))
+    ) %>% 
+    # convert periodicity of ranked names to target rebalancing period
+    group_by(key) %>% 
+    as_period(., rebal.period)
+  
+  return(.ntiled)
+}
+```
+
+```{r, inclue=FALSE}
+# rank stocks based on momentum
+mom.quintile <- mom %>% .ntiled.fun()
+# rank stocks based on long-term momentum
+ltmom.quintile <- lt.mom %>% .ntiled.fun()
+# rank stocks based on volatility
+vol.quintile <- vol %>% .ntiled.fun()
+# rank stocks based on per
+per.quintile <- per %>% .ntiled.fun()
+# rank stocks based on pbv / market-to-book
+pbv.quintile <- mbr %>% .ntiled.fun()
+# rank stocks based on size (market cap)
+mcap.quintile <- mcap %>% .ntiled.fun()
+# rank stocks based on roe
+roe.quintile <- roe %>% .ntiled.fun()
+# rank stocks based on roa
+roa.quintile <- roa %>% .ntiled.fun()
+# short-term reversal
+reversal.quintile <- stock.returns %>% group_by(key) %>% 
+  # lag monthly returns to avoid look-ahead bias
+  mutate(period.chg = lag(period.chg)) %>% 
+  spread(key, period.chg) %>% 
+  .ntiled.fun()
+# rank stocks based on beta
+beta.quintile <- beta %>% .ntiled.fun()
+# rank stocks based on tp revisions
+tp.quintile <- tp %>% .ntiled.fun()
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Calculate factor returns per quintile
+quintile.return <- function(x = "stock returns", y = "factor quintile", z = "factor name") {
+  factor.quintile.return = x %>% 
+  left_join(., y) %>% 
+  filter(
+    multiple.quintile != "Quintile NA"
+  ) %>% 
+  group_by(Date, multiple.quintile) %>% 
+  summarise(
+    quintile.avg.return = mean(period.chg, na.rm = TRUE) %>% replace(., is.nan(.) | is.infinite(.), 0) - 0.0175
+  ) %>% 
+  ungroup() %>%
+  group_by(multiple.quintile) %>% 
+  mutate(
+    cummulative.return = (cumprod(1 + quintile.avg.return) - 1) * 100,
+    annual.rolling.return = (rollapplyr(1 + quintile.avg.return, FUN = prod, width = 12, na.rm = TRUE, fill = NA) - 1) * 100,
+    Factor = z
+  )
+}
+
+mom.quintile.return <- quintile.return(stock.returns, mom.quintile, "MOM (MT)")
+ltmom.quintile.return <- quintile.return(stock.returns, ltmom.quintile, "MOM (LT)")
+per.quintile.return <- quintile.return(stock.returns, per.quintile, "PER")
+pbv.quintile.return <- quintile.return(stock.returns, pbv.quintile, "Mkt-Book Ratio") 
+vol.quintile.return <- quintile.return(stock.returns, vol.quintile, "VOL")
+roe.quintile.return <- quintile.return(stock.returns, roe.quintile, "ROE")
+roa.quintile.return <- quintile.return(stock.returns, roa.quintile, "ROA")
+mcap.quintile.return <- quintile.return(stock.returns, mcap.quintile, "SIZE")
+reversal.quintile.return <- quintile.return(stock.returns, reversal.quintile, "MOM (ST)")
+beta.quintile.return <- quintile.return(stock.returns, reversal.quintile, "BETA")
+tp.quintile.return <- quintile.return(stock.returns, tp.quintile, "TP Revision")
+```
+
+Running a factor model on listed names in the Philippine Stock Market shows that Size, Momentum, Beta factors work as intended. Meanwhile, factors including Value, Volatility, Quality, and TP revisions factors in the local market contradicted what is in the books. This could just be a function of rebalancing period but I'll reserve that exercise for another day.
+<br>
+
+```{r}
+# plot distribution of quintile spreads
+factor.returns <- bind_rows(
+  # bind new factor quintile returns here
+  as.data.frame(mcap.quintile.return), as.data.frame(pbv.quintile.return), 
+  as.data.frame(vol.quintile.return), as.data.frame(mom.quintile.return), 
+  as.data.frame(per.quintile.return), as.data.frame(reversal.quintile.return),
+  as.data.frame(roe.quintile.return), as.data.frame(roa.quintile.return), 
+  as.data.frame(ltmom.quintile.return), as.data.frame(beta.quintile.return),
+  as.data.frame(tp.quintile.return)
+  ) %>% 
+  arrange(Factor) %>% 
+  mutate(
+    Factor = factor(Factor, levels = unique(Factor))
+  )
+
+# calculate quintile spreads
+quintile.spreads <- factor.returns %>% 
+  select(-c(quintile.avg.return, cummulative.return)) %>% 
+  spread(multiple.quintile, annual.rolling.return) %>% 
+  group_by(Factor) %>% 
+  mutate(
+    q1.q5.spread = `Quintile 5` - `Quintile 1`
+  ) %>% 
+  select(Date, Factor, q1.q5.spread)
+
+quintile.spreads %>% 
+  plot_ly(            x = ~q1.q5.spread,
+                      color = ~Factor,
+                      colors = basic.color,
+                      type = "box",
+                      showlegend = FALSE
+  ) %>% 
+  add_annotations(
+    x = -300,
+    y = 5,
+    text = "Bottom Quintile 
+    Outperforms",
+    showarrow = FALSE,
+    font = list(color = "red",
+                size = 12)
+  ) %>% 
+  add_annotations(
+    x = 300,
+    y = 5,
+    text = "Top Quintile 
+    Outperforms",
+    showarrow = FALSE,
+    font = list(color = "blue",
+                size = 12)
+  ) %>%
+  layout(
+    title = "<b>Distribution of Rolling Quintile Performance Post-GFC</b>",
+    titlefont = list(family = "Arial",
+                     color = "#C00000"),
+    yaxis = list(title = ~Factor,
+                 titlefont = list(family = "Arial",
+                                  size = 12),
+                 showgrid = FALSE),
+    xaxis = list(title = "Spread between Fifth and First Quintiles in Basis Points",
+                 titlefont = list(family = "Arial"),
+                 showgrid = FALSE),
+    legend = list(titlefont = list(family = "Arial"))
+  )
+```
+
+ROA, ROE, Market-to-Book, Size factor spreads are highly correlated since 2001, with the Size factor spreads being the most volatile and Market-to-Book factor spreads the least volatile. This correlated group has been inversely correlated with PER factor spreads in 2011 and 2016. Meanwhile, mid-term momentum shows a sort of cyclical pattern that is not observable in both short and long term momentum spreads. I'm sure there is a reason for these but I'll look into it another time.
+
+<br>
+```{r}
+quintile.spreads %>% 
+  plot_ly(
+    x = ~Date,
+    y = ~q1.q5.spread,
+    color = ~Factor,
+    colors = basic.color,
+    type = "scatter",
+    mode = "lines"
+  ) %>% 
+    add_annotations(
+    y = 300,
+    x = ymd("2011-06-01"),
+    text = "Top Quintile Outperforms",
+    showarrow = FALSE,
+    font = list(color = "blue",
+                size = 12)
+  ) %>% 
+  add_annotations(
+    y = -400,
+    x = ymd("2011-06-01"),
+    text = "Bottom Quintile Outperforms",
+    showarrow = FALSE,
+    font = list(color = "red",
+                size = 12)
+  ) %>%
+  layout(
+        title = "<b>Rolling Annual Quintile Return Spreads</b>",
+        titlefont = list(family = "arial",
+                         color = "#C00000"),
+        yaxis = list(title = ~Factor,
+                     titlefont = list(family = "arial",
+                                      size = 12),
+                     showgrid = FALSE),
+        xaxis = list(title = "",
+                     titlefont = list(family = "arial"),
+                     automargin = TRUE,
+                     showgrid = FALSE),
+        legend = list(titlefont = list(family = "arial"),
+                      orientation = "v"
+                      #x = 0.5
+                      ),
+        margin = list(t = 50)
+      )
+```
+Rolling annual returns show cyclicality of returns, mostly dominated by low ROE and low cap names. None of the factors exhibited a stable annual growth except for the high market-to-book stocks, which stabilized around a -13%  rolling annual return since late 2014. This means all factors tested in the Philippine market excluding high market-to-book stocks displayed return cyclicality. While not entirely bad on its own, it means that these strategies cannot be used on their own, and more research and fine tuning must be done first before putting money into this. 
+
+<br>
+```{r, warning=FALSE}
+bind.bnh <- buy.and.hold %>% 
+  rename(
+    cummulative.return = buy.and.hold.cumm,
+    annual.rolling.return = buy.and.hold     
+         ) %>% 
+  mutate(
+    multiple.quintile = "Buy and Hold",  
+    quintile.avg.return = NA,
+    Factor = "Buy and Hold",
+    include = 1
+  ) %>% 
+  select(Date, multiple.quintile, quintile.avg.return, cummulative.return, annual.rolling.return, Factor, include) %>% 
+  as.data.frame()
+
+quintile.1 <- c("MOM (LT)", "Size", "ROE")
+
+combined.factor.returns <- factor.returns %>% 
+  bind_rows(bind.bnh) %>% 
+  mutate(
+    Factor = ifelse(Factor == "Buy and Hold", Factor, paste0(Factor, " ", "Q", word(multiple.quintile, start = -1)))
+  ) %>% 
+  arrange(Factor) %>% 
+  mutate(
+    Factor = factor(Factor, levels = unique(Factor))
+  )
+
+combined.factor.returns %>%
+  filter(multiple.quintile %in% c("Quintile 1", "Quintile 5", "Buy and Hold")) %>% 
+  plot_ly(x = ~Date, y = ~annual.rolling.return, 
+          color = ~Factor, 
+          colors = basic.color,
+          type = "scatter", mode = "lines",
+          height = 450) %>% 
+  layout(
+    title = "<b>Annual Rolling Returns of Factor Quintiles</b> \nRebalanced at the start of the month",
+    titlefont = list(family = "arial",
+                     color = "#C00000"),
+    yaxis = list(title = ~Factor,
+                 titlefont = list(family = "arial",
+                                  size = 12),
+                 showgrid = FALSE),
+    xaxis = list(title = "Rolling Annual Returns Net of Transaction Costs [%]",
+                 titlefont = list(family = "arial"),
+                 showgrid = FALSE),
+    legend = list(titlefont = list(family = "arial")),
+    margin = list(t = 100, b = 75)
+    )
+```
+
+```{r}
+# Names of stocks in the fifth quintile
+n.quintile <- function(x, .Date = "yyyy-mm", q = c("Quintile 1", "Quintile 5")) {
+  q.name = x %>% 
+    filter(multiple.quintile %in% q) %>% 
+    filter_time( ~ .Date) %>% 
+    slice(which.max(Date)) %>% 
+    arrange(multiple.quintile)
+  
+  return(q.name)
+}
+
+d8 <- "2019-03"
+
+# Filter out top names as of specified date
+mom.names <- mom.quintile %>% n.quintile(., .Date = d8)
+ltmom.names <- ltmom.quintile %>% n.quintile(., .Date = d8)
+vol.names <- vol.quintile %>% n.quintile(., .Date = d8)
+per.names <- per.quintile %>% n.quintile(., .Date = d8)
+pbv.names <- pbv.quintile %>% n.quintile(., .Date = d8)
+roe.names <- roe.quintile %>% n.quintile(., .Date = d8)
+size.names <- mcap.quintile %>% n.quintile(., .Date = d8)
+beta.names <- beta.quintile %>% n.quintile(., .Date = d8)
+```
+

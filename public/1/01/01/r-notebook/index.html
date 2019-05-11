@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>R Notebook</title>
+        <style>
+
+    html body {
+        font-family: 'Mina', sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    :root {
+        --accent: #386890;
+        --border-width:  0 ;
+    }
+
+</style>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Mina">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=VT323">
+
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/lakeside-light.min.css"> 
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+
+ 
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+    
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+
+<script>$(document).on('click', function() { $('.collapse').collapse('hide'); })</script>
+
+
+<script>
+$(document).ready(function(){
+    
+  var input = $('#night-mode-toggle');
+  var container = $('#bigbody');
+  var stat = $('#button-status');
+  
+  container.toggleClass(localStorage.toggled);
+  stat.bootstrapToggle(localStorage.button).change();
+  
+  input.on('click', function() {
+      if (localStorage.toggled != "-nightmode" ) {
+          container.toggleClass("-nightmode", true );
+          localStorage.toggled = "-nightmode";
+          localStorage.button = "on";
+       } else {
+          container.toggleClass("-nightmode", false );
+          localStorage.toggled = "";
+          localStorage.button = "off"
+       }
+  })
+});
+</script>
+ <meta name="generator" content="Hugo 0.54.0" />
+        
+        
+        
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133552770-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', 'UA-133552770-1');
+        </script>
+        
+
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/img/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/img/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    
+    
+    
+    <meta property="og:title" content="R Notebook">
+    <meta property="og:type" content="article">
+      
+      <meta name="twitter:card" content="summary">
+      <meta name="twitter:image" content="/favicon/birdmath.png" >
+      
+    <meta property="description" content="">
+    <meta property="og:description" content="">
+    
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:site" content="">
+    
+    </head>
+
+    
+    
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    
+
+    <body id = "bigbody">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand visible-xs" href="#">R Notebook</a>
+                    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    
+                        <ul class="nav navbar-nav">
+                            
+                                <li><a href="/">Home</a></li>
+                            
+                                <li><a href="/post/">Posts</a></li>
+                            
+                                <li><a href="/project/">Projects</a></li>
+                            
+                                <li><a href="/tags/">Tags</a></li>
+                            
+                        </ul>
+                    
+                    
+                        <ul class="nav navbar-nav navbar-right">
+                            
+                                <li class="navbar-icon"><a href="mailto:emcmunsayac@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://twitter.com/coco_not_martin/"><i class="fa fa-twitter"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://www.linkedin.com/in/emcmunsayac/"><i class="fa fa-linkedin"></i></a></li>
+                            
+                            <li id="night-mode-toggle">
+    <input type="checkbox" id = "button-status"
+        data-toggle="toggle"
+        data-width = "10"
+        data-height = "1"
+        data-on="<i class='fa fa-moon-o fa-lg' style='vertical-align:25%'></i>"
+        data-off= "<i class='fa fa-sun-o fa-lg' style='vertical-align:25%'></i>"
+        data-style="ios"
+        data-onstyle = "default">
+</li>
+                        </ul>
+                    
+                </div>
+            </div>
+        </nav>
+
+
+<main>
+
+    <div class="item">
+
+    
+    
+    
+
+    
+    
+      
+    
+
+    <h4><a href="/1/01/01/r-notebook/">R Notebook</a></h4>
+    <h5>January 1, 0001 - 2 minutes</h5>
+    <h5></h5>
+
+    
+    
+
+</div>
+
+
+    <br> <div class="text-justify">
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<p><img src="/post/inflation-exercise-20190310_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="/post/inflation-exercise-20190310_files/figure-html/unnamed-chunk-3-1.png" width="768" /></p>
+<pre><code>## 
+## Call:
+## lm(formula = form, data = inflation.train)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.93709 -0.23358  0.02075  0.21557  0.92253 
+## 
+## Coefficients:
+##                         Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)             0.362667   0.082169   4.414 2.57e-05 ***
+## cpi.all.remainder       0.647115   0.041949  15.426  &lt; 2e-16 ***
+## cpi.all.season          1.130926   0.280664   4.029 0.000109 ***
+## cpi.all.trend           0.869045   0.019900  43.672  &lt; 2e-16 ***
+## dubai.crude.observed    0.008591   0.001626   5.283 7.46e-07 ***
+## dubai.crude.remainder  -0.005158   0.002136  -2.415 0.017574 *  
+## regular.rice.remainder  0.032206   0.006186   5.206 1.03e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.3662 on 100 degrees of freedom
+## Multiple R-squared:  0.9761, Adjusted R-squared:  0.9747 
+## F-statistic: 681.2 on 6 and 100 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   Model               `Root Mean Squared Error (b~ `Mean Absolute Error (b~
+##   &lt;chr&gt;                                      &lt;dbl&gt;                    &lt;dbl&gt;
+## 1 Boosted Linear                              86.3                     71.4
+## 2 Boosted Tree                                82.5                     66.4
+## 3 Model Average                               57.8                     47.9
+## 4 OLS                                         34.3                     29.5
+## 5 Random Forest                               75.1                     57.3
+## 6 Support Vector Mac~                         34                       29.6</code></pre>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"visdat":{"1f286e4b492d":["function () ","plotlyVisDat"]},"cur_data":"1f286e4b492d","attrs":{"1f286e4b492d":{"x":{},"y":{},"mode":"lines","color":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"<b>Inflation Rate as a Function of Previous Month's Inflation Rate, Dubai Crude, and Rice Prices, <br />along with the variable's Error, Trend, and Seasonality<b>","titlefont":{"family":"Arial","size":15,"color":"#C00000"},"yaxis":{"domain":[0,1],"automargin":true,"title":"<b>Inflation Rate [%]<\/b>","showgrid":true,"titlefont":{"family":"Arial","size":12,"color":"#C00000"},"range":[0,8]},"xaxis":{"domain":[0,1],"automargin":true,"title":"","showgrid":false},"legend":{"font":{"family":"Arial","size":12}},"hovermode":"closest","showlegend":true},"source":"A","config":{"showSendToCloud":false},"data":[{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.83303213119507,4.06337070465088,3.90939259529114,2.86398506164551,2.95942449569702,2.50213670730591,3.82005190849304,2.8400547504425,3.57026433944702,3.6685950756073,4.1772518157959,3.24598264694214,3.57235550880432,3.18767690658569,4.25034332275391,4.84308195114136,4.86493349075317,4.81753206253052,5.03719997406006,4.94178819656372,4.95469188690186,4.69360828399658,4.03165578842163,4.02251243591309,4.25332355499268],"mode":"lines","type":"scatter","name":"Boosted Linear","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"line":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.69599008560181,4.01859188079834,3.44123959541321,3.22695827484131,2.90302658081055,2.79089689254761,3.42288541793823,3.04032492637634,3.59582901000977,3.75717043876648,4.17610549926758,3.72590017318726,4.07523441314697,3.19928169250488,4.51664447784424,4.62071847915649,4.72502470016479,4.63638973236084,4.75841903686523,4.96718597412109,4.97517967224121,4.96652936935425,4.3519868850708,4.18071174621582,4.08663702011108],"mode":"lines","type":"scatter","name":"Boosted Tree","marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"line":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.07262569832403,3.07262569832403,3.15691736304549,2.87303058387396,2.49307479224377,2.3963133640553,2.58064516129033,3.03587856485741,3.12213039485767,3.01369863013699,2.91173794358506,3.44514959202176,3.7940379403794,4.33604336043361,4.5004500450045,4.59459459459459,5.22522522522522,5.67056705670568,6.37915543575922,6.69642857142858,6.41139804096171,5.93971631205674,5.12820512820513,4.38212094653812,3.82941688424716],"mode":"lines","type":"scatter","name":"Inflation Rate","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"line":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.4260726348558,3.63544282865652,3.45887068308892,3.09698091087945,2.87404093455268,2.64727711495006,3.06880246768309,2.83551752497364,3.28747974584251,3.39669708955335,3.57727710227816,3.3594647242018,3.71305708454055,3.65276900497668,4.38892106452036,4.67142043461205,4.83412741009404,5.08020740017528,5.37507392159559,5.65743456615077,5.71107806462434,5.38179686088107,4.739215342059,4.33958635417,4.07583913538767],"mode":"lines","type":"scatter","name":"Model Averages","marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"line":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.25236965719199,3.51878678270646,3.45200515499575,3.3239375090746,3.01269846371725,2.78651091277003,2.7504713010958,2.73593768396012,3.17565371806074,3.26098234726189,3.22158305048315,3.2263050486714,3.61338632249613,3.82760239453362,4.4182422383716,4.65011519516992,4.74845472183162,5.32418776541208,5.63260333839921,6.19235095602476,6.50307812922756,5.99165460758295,5.29192644871695,4.68927161514045,4.10016459767888],"mode":"lines","type":"scatter","name":"OLS","marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"line":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.39836686715956,3.54193444903024,3.32507683424413,2.9783261487508,2.86524632595561,2.65493953237535,3.06718621222006,2.61475814057911,3.07827673441164,3.39750966881769,3.72334105206073,3.29898619241932,3.60178369095398,3.52769315382873,4.22847976656271,4.65259154633258,4.65433720901216,4.67166380200806,4.79292832404166,4.92136233843541,4.92113831546148,4.69727975364082,4.33661689968176,4.10826681259141,4.09369106349429],"mode":"lines","type":"scatter","name":"Random Forest","marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"line":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["2017-02-28","2017-03-31","2017-04-30","2017-05-31","2017-06-30","2017-07-31","2017-08-31","2017-09-30","2017-10-31","2017-11-30","2017-12-31","2018-01-31","2018-02-28","2018-03-31","2018-04-30","2018-05-31","2018-06-30","2018-07-31","2018-08-31","2018-09-30","2018-10-31","2018-11-30","2018-12-31","2019-01-31","2019-02-28"],"y":[3.30405136966233,3.59734745642919,3.46859255554382,3.3156478870905,3.01077494889186,2.75286528064614,2.77157480506108,2.74615108362638,3.18272427826823,3.28222637672977,3.25364325247652,3.21446469196893,3.62154463146252,3.83831652197357,4.4193665365852,4.66742084127735,4.78678911357729,5.36090398203449,5.65013742044816,6.22549136033108,6.50098234295223,6.00199283865509,5.29490090225775,4.65463456862114,4.09180169180196],"mode":"lines","type":"scatter","name":"Support Vector Machine","marker":{"color":"rgba(229,196,148,1)","line":{"color":"rgba(229,196,148,1)"}},"textfont":{"color":"rgba(229,196,148,1)"},"error_y":{"color":"rgba(229,196,148,1)"},"error_x":{"color":"rgba(229,196,148,1)"},"line":{"color":"rgba(229,196,148,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+
+    
+    
+
+    
+
+    
+
+</main>
+
+        <footer id = "bigfooter">
+            <div style = "padding:15px;">
+                <p>Powered by <a href="https://gohugo.io">Hugo</a>. Themed by <a href="https://github.com/nathancday/min_night">min_night</a>.
+                </p>
+                <a rel="license" href="https://creativecommons.org/licenses/by/4.0/"
+                title="Creative Commons Attribution 4.0 International license">
+                <i class="fa fa-creative-commons" aria-hidden="true"></i> Attribution 4.0 International license
+                </a>
+            </div>
+        </footer>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-133552770-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', 'UA-133552770-1');
+        </script>
+       
+    </body>
+
+</html>
+

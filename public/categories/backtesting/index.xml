@@ -6,18 +6,18 @@
     <description>Recent content in Backtesting on Bird Math</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 26 Feb 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 15 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/backtesting/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>PH Factor Returns</title>
-      <link>/2019/02/26/ph-factor-returns/</link>
-      <pubDate>Tue, 26 Feb 2019 00:00:00 +0000</pubDate>
+      <link>/2019/03/15/ph-factor-returns/</link>
+      <pubDate>Fri, 15 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/02/26/ph-factor-returns/</guid>
-      <description>Summary: (1) Philippine stocks doest not seem to follow standard factor literature as high multiples and high volatility stocks outperform their bottom quintile counterparts. (2) Momentum and size factors seem to work on Philippine stocks, with the latter generating the best annual rolling returns post-GFC. Size factor also seems to provide the best return after a market lull/downturn. (3) Standard factors in the Philippines does not seem to provide good portfolio diversification given the high correlation between strategies.</description>
+      <guid>/2019/03/15/ph-factor-returns/</guid>
+      <description>Running a factor model on listed names in the Philippine Stock Market shows that Size, Momentum, Beta factors work as intended. Meanwhile, factors including Value, Volatility, Quality, and TP revisions factors in the local market contradicted what is in the books. This could just be a function of rebalancing period but I’ll reserve that exercise for another day.## Warning: Ignoring 191 observations## Warning: The titlefont attribute is deprecated.</description>
     </item>
     
     <item>
