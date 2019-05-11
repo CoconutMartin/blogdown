@@ -295,7 +295,7 @@ quintile.spreads %>%
 ```
 
 <br>
-ROA, ROE, Market-to-Book, Size factor spreads are highly correlated since 2001, with the Size factor spreads being the most volatile and Market-to-Book factor spreads the least volatile. This correlated group has been inversely correlated with PER factor spreads in 2011 and 2016. Meanwhile, mid-term momentum shows a sort of cyclical pattern that is not observable in both short and long term momentum spreads. I'm sure there is a reason for these but I'll look into it another time.
+ROA, ROE, Market-to-Book, Size factor spreads are highly correlated since 2001, with the Size factor spreads being the most volatile and Market-to-Book factor spreads the least volatile. This correlated group has been inversely correlated with PER factor spreads in 2011 and 2016. Meanwhile, mid-term momentum shows a sort of cyclical pattern that is not observable in both short and long term momentum spreads. I'm sure there is a reason for this but I'll look into it another time.
 <br>
 
 ```{r}
