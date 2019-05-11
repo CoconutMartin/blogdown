@@ -224,6 +224,7 @@ beta.quintile.return <- quintile.return(stock.returns, reversal.quintile, "BETA"
 tp.quintile.return <- quintile.return(stock.returns, tp.quintile, "TP Revision")
 ```
 
+<br>
 Running a factor model on listed names in the Philippine Stock Market shows that Size, Momentum, Beta factors work as intended. Meanwhile, factors including Value, Volatility, Quality, and TP revisions factors in the local market contradicted what is in the books. This could just be a function of rebalancing period but I'll reserve that exercise for another day.
 <br>
 
@@ -293,9 +294,10 @@ quintile.spreads %>%
   )
 ```
 
-ROA, ROE, Market-to-Book, Size factor spreads are highly correlated since 2001, with the Size factor spreads being the most volatile and Market-to-Book factor spreads the least volatile. This correlated group has been inversely correlated with PER factor spreads in 2011 and 2016. Meanwhile, mid-term momentum shows a sort of cyclical pattern that is not observable in both short and long term momentum spreads. I'm sure there is a reason for these but I'll look into it another time.
-
 <br>
+ROA, ROE, Market-to-Book, Size factor spreads are highly correlated since 2001, with the Size factor spreads being the most volatile and Market-to-Book factor spreads the least volatile. This correlated group has been inversely correlated with PER factor spreads in 2011 and 2016. Meanwhile, mid-term momentum shows a sort of cyclical pattern that is not observable in both short and long term momentum spreads. I'm sure there is a reason for these but I'll look into it another time.
+<br>
+
 ```{r}
 quintile.spreads %>% 
   plot_ly(
@@ -341,8 +343,9 @@ quintile.spreads %>%
         margin = list(t = 50)
       )
 ```
-Rolling annual returns show cyclicality of returns, mostly dominated by low ROE and low cap names. None of the factors exhibited a stable annual growth except for the high market-to-book stocks, which stabilized around a -13%  rolling annual return since late 2014. This means all factors tested in the Philippine market excluding high market-to-book stocks displayed return cyclicality. While not entirely bad on its own, it means that these strategies cannot be used on their own, and more research and fine tuning must be done first before putting money into this. 
 
+<br>
+Rolling annual returns show cyclicality of returns, mostly dominated by low ROE and low cap names. None of the factors exhibited a stable annual growth except for the high market-to-book stocks, which stabilized around a -13%  rolling annual return since late 2014. This means all factors tested in the Philippine market excluding high market-to-book stocks displayed return cyclicality. While not entirely bad on its own, it means that these strategies cannot be used on their own, and more research and fine tuning must be done first before putting money into this. 
 <br>
 ```{r, warning=FALSE}
 bind.bnh <- buy.and.hold %>% 
