@@ -124,7 +124,7 @@ workset %>%
   geom_hline(yintercept = 0) +
   labs(title = "Comparison of a Simple Moving Average Model to an Annual Momentum Model Rebalanced Daily",
        x = "",
-       y = "Total Return [%]") +
+       y = "Percent [%]") +
   facet_grid(.key ~., scales = "free", switch = "y")
 ```
 
