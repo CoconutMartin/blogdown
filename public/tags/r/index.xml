@@ -6,10 +6,20 @@
     <description>Recent content in R on Bird Math</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 15 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 12 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Momentum and Moving Averages</title>
+      <link>/2019/05/12/momentum-and-moving-averages/</link>
+      <pubDate>Sun, 12 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/05/12/momentum-and-moving-averages/</guid>
+      <description>Both models have shown their capability to outperform depending on liquity and market cap requirements. Adopting a more conservative approach where we only invest in names that has an average turnover value of PhP20.0mn and a maximum market cap of PhP75.0bn ties total performance of both models as of end-2015 and as of May 10, 2019.
+This actually boils down to which strategy has the lowest median drawdown, of which the Momentum model takes the cake.</description>
+    </item>
     
     <item>
       <title>PH Factor Returns</title>

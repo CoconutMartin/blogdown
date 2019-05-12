@@ -1,0 +1,225 @@
+---
+title: Momentum and Moving Averages
+author: CoconutMartin
+date: '2019-05-12'
+slug: momentum-and-moving-averages
+categories:
+  - Backtesting
+tags:
+  - R
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+library(tidyquant)
+set.seed(1)
+
+p <- data.table::fread("C:/Users/Martin/Google Drive/7. Datasets/all shares px.csv") %>% mutate(Date = dmy(Date)) %>% gather(key, px, -Date)
+v <- data.table::fread("C:/Users/Martin/Google Drive/7. Datasets/all shares to.csv") %>% mutate(Date = dmy(Date)) %>% gather(key, val, -Date)
+m <- data.table::fread("C:/Users/Martin/Google Drive/7. Datasets/all shares mcap.csv") %>% mutate(Date = dmy(Date)) %>% gather(key, mcap, -Date)
+
+combo <- plyr::join_all(list(p, v, m), match = "first")
+
+theme_set(theme_tq() +
+            theme(panel.grid = element_blank(),
+                  legend.position = "top"))
+```
+
+```{r, fig.height=7}
+# Qualitative filters
+mcap.max <- 75
+mcap.min <- 0
+to.cutoff <- 20
+.mom.ntile <- 10
+
+# Periodic filters
+sma.cutoff <- 20 # SMA length
+to.period <- 20
+momentum.cutoff <- 252
+backtest.start <- 2000
+backtest.end <- 2015
+
+sma.daily.0 <- combo %>% 
+  group_by(key) %>% 
+  filter(!key %in% c("PCOMP", "PSEI")) %>% 
+  mutate(
+    mcap = mcap / 1e3, 
+    avg.to = RcppRoll::roll_meanr(val, n = to.period, na.rm = TRUE, fill = NA) %>% replace(is.nan(.), NA) / 1e6,
+    sma = RcppRoll::roll_meanr(px, n = sma.cutoff, na.rm = TRUE, fill = NA) %>% replace(is.nan(.), NA),
+    px.chg = px / lag(px, 1) - 1
+  ) %>% 
+  filter(mcap <= mcap.max & mcap > mcap.min, avg.to >= to.cutoff) %>% 
+  mutate(
+    sma.return = ifelse(px > sma, 1, NA) %>% lag(., 1) * px.chg
+  )
+  
+sma.daily <- sma.daily.0 %>% 
+  group_by(Date) %>% 
+  summarise(
+    sma.daily.return = mean(sma.return, na.rm = TRUE) %>% replace_na(., 0)
+  ) %>% 
+  ungroup()
+
+mom.daily.0 <- combo %>% 
+  group_by(key) %>% 
+  filter(!key %in% c("PCOMP", "PSEI")) %>% 
+  mutate(
+    mcap = mcap / 1e3, 
+    avg.to = RcppRoll::roll_meanr(val, n = to.cutoff, na.rm = TRUE, fill = NA) %>% replace(is.nan(.), NA) / 1e6,
+    annual.momentum = px / lag(px, momentum.cutoff) - 1,
+    px.chg = px / lag(px, 1) - 1,
+  ) %>% 
+  filter(mcap <= mcap.max & mcap > mcap.min, avg.to >= to.cutoff) %>% 
+  group_by(Date) %>% 
+  mutate(
+    mom.ntile = ntile(!is.na(annual.momentum), .mom.ntile),
+    mom.return = ifelse(mom.ntile == .mom.ntile, 1, NA) %>% lag(., 1) * px.chg
+  )
+
+mom.daily <- mom.daily.0 %>% 
+  arrange(Date) %>% 
+  na.omit() %>% 
+  group_by(Date) %>% 
+  summarise(
+    mom.daily.return = mean(mom.return, na.rm = TRUE) %>% replace_na(., 0)
+  ) %>% 
+  ungroup()
+
+bnh <- combo %>% 
+  filter(key == "PCOMP") %>% 
+  mutate(
+    bnh.daily = px / lag(px, 1) - 1
+  ) %>% 
+  select(Date, bnh.daily)
+  
+workset <- sma.daily %>% 
+  left_join(., mom.daily) %>%
+  left_join(., bnh) %>% 
+  mutate(
+    correlation = runCor(replace_na(sma.daily.return, 0), replace_na(mom.daily.return, 0), n = 60) %>% replace(is.nan(.), NA)
+  ) %>% 
+  filter(year(Date) %in% backtest.start:backtest.end) %>% 
+  gather(key, day.chg, -c(Date, correlation)) %>% 
+  group_by(key) %>% 
+  mutate(
+    day.chg = replace_na(day.chg, 0),
+    total.return = cumprod(1 + day.chg) - 1,
+    annual.return = rollapplyr(1 + day.chg, FUN = prod, width = 252, na.rm = TRUE, fill = NA),
+    drawdown = Drawdowns(day.chg)
+  ) %>% 
+  rename("daily.return" = "day.chg") %>%
+  gather(.key, .value, -c(Date, key)) %>%
+  ungroup() %>% 
+  mutate(
+    key = word(key, start = 1, end = 1, sep = fixed(".")),
+    key = ifelse(key == "mom", "Momentum", 
+                 ifelse(key == "sma", "Simple Moving Average", "Buy and Hold Index")),
+    .key = gsub("[.]", " ", .key) %>% str_to_title(),
+    .key = factor(.key, levels = c("Total Return", "Annual Return", "Drawdown", "Daily Return", "Correlation"))
+  )
+
+workset %>% 
+  ggplot(aes(Date, .value * 100, color = key)) +
+  geom_line(size = 0.75) +
+  geom_hline(yintercept = 0) +
+  labs(title = "Comparison of a Simple Moving Average Model to an Annual Momentum Model Rebalanced Daily",
+       x = "",
+       y = "Total Return [%]") +
+  facet_grid(.key ~., scales = "free", switch = "y")
+```
+
+<br>
+Both models have shown their capability to outperform depending on liquity and market cap requirements. Adopting a more conservative approach where we only invest in names that has an average turnover value of PhP20.0mn and a maximum market cap of PhP75.0bn ties total performance of both models as of end-2015 and as of May 10, 2019.
+<br>
+
+```{r}
+workset %>% 
+  filter(.key %in% c("Daily Return", "Drawdown")) %>% 
+  mutate(key = factor(key, levels = c("Momentum", "Simple Moving Average", "Buy and Hold Index"))) %>% 
+  group_by(key) %>% 
+  ggplot(aes(key, .value * 100, fill = .key)) +
+  geom_boxplot(size = 0.25) +
+  geom_hline(yintercept = 0) +
+  coord_flip() +
+  labs(title = "Distribution of Daily Returns and Drawdown",
+       x = "",
+       y = "Percent [%]")
+```
+
+<br>
+This actually boils down to which strategy has the lowest median drawdown, of which the Momentum model takes the cake. It is kinda weird that the Momentum model has the lowest median drawdown compared to the more diversified SMA model and Index, despite the fact that there are times when the model only holds a single name in its portfolio. A fully diversified moving average model might be expensive to implement With a smaller portfolio as it typically holds at least 3-5 names on average.
+
+Interestingly enough, correlation between Momentum and SMA are pretty low at about 20% and rarely breaching 50% levels, so there is room to take on more names from the SMA to the Momentum model to allow for diversification.
+<br>
+
+```{r}
+# Counting portfolio  holdings
+mom.count <- mom.daily.0 %>% 
+  filter(mom.ntile == 10) %>% 
+  group_by(Date) %>%   
+  count(mom.ntile) %>% 
+  rename(mom.count = n)
+
+sma.count <- sma.daily.0 %>% 
+  na.omit() %>% 
+  group_by(Date) %>% 
+  count(sma.return) %>% 
+  rename(sma.count = n)
+
+mom.count %>% 
+  left_join(., sma.count) %>% 
+  rename("Momentum" = "mom.count", "Simple Moving Average" = "sma.count") %>% 
+  select(-c(mom.ntile, sma.return)) %>% 
+  gather(key, value, -Date) %>% 
+  group_by(key) %>% 
+  mutate(
+    sma.ct = median(value, na.rm = TRUE)
+  ) %>% 
+  ggplot(aes(Date, value, color = key)) +
+  geom_line(show.legend = FALSE) +
+  #geom_line(aes(Date, sma.ct), color = "black") +
+  labs(title = "Model Portfolio Holdings",
+       x = "",
+       y = "Count") +
+  scale_y_continuous(breaks = seq(0, 13, by = 1)) +
+  facet_grid(key~., scales = "free", switch = "y")
+```
+
+<br>
+Only two names so far for momentum picks in 2019:
+<br>
+
+```{r}
+# Momentum picks
+mom.daily.0 %>% 
+  filter(mom.ntile == 10) %>% 
+  filter(year(Date) == 2019) %>% 
+  na.omit() %>% 
+  arrange(Date)
+```
+
+<br>
+Below are simple moving average picks in 2019
+<br>
+
+```{r}
+# Simple Moving Average Picks
+combo %>% 
+  filter(year(Date) %in% 2019) %>% 
+  group_by(key) %>% 
+  filter(!key %in% c("PCOMP", "PSEI")) %>% 
+  mutate(
+    mcap = mcap / 1e3, 
+    avg.to = RcppRoll::roll_meanr(val, n = to.period, na.rm = TRUE, fill = NA) %>% replace(is.nan(.), NA) / 1e6,
+    sma = RcppRoll::roll_meanr(px, n = sma.cutoff, na.rm = TRUE, fill = NA) %>% replace(is.nan(.), NA),
+    px.chg = px / lag(px, 1) - 1
+  ) %>% 
+  filter(mcap <= mcap.max & mcap > mcap.min, avg.to >= to.cutoff) %>% 
+  mutate(
+    sma.return = ifelse(px > sma, 1, NA) %>% lag(., 1) * px.chg
+  ) %>% 
+  na.omit() %>% 
+  filter(Date >= ymd("2019-05-10"))
+```
+
+

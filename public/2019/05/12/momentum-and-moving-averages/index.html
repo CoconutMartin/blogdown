@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>R</title>
+        <title>Momentum and Moving Averages</title>
         <style>
 
     html body {
@@ -92,9 +92,6 @@ $(document).ready(function(){
 </script>
  <meta name="generator" content="Hugo 0.54.0" />
         
-        <link href="/tags/r/index.xml" rel="alternate" type="application/rss+xml" title="Bird Math" />
-        <link href="/tags/r/index.xml" rel="feed" type="application/rss+xml" title="Bird Math" />
-        
         
         
         
@@ -120,7 +117,7 @@ $(document).ready(function(){
     
     
     
-    <meta property="og:title" content="R">
+    <meta property="og:title" content="Momentum and Moving Averages">
     <meta property="og:type" content="article">
       
       <meta name="twitter:card" content="summary">
@@ -145,7 +142,7 @@ $(document).ready(function(){
         <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand visible-xs" href="#">R</a>
+                    <a class="navbar-brand visible-xs" href="#">Momentum and Moving Averages</a>
                     <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -193,284 +190,162 @@ $(document).ready(function(){
 
 
 <main>
-    <h2>R</h2>
+
+    <div class="item">
 
     
-        
-            <div class="item">
+    
     
 
+    
+    
+      
+    
 
-
-
-
-
-  
-
-
-<h4><a href="/2019/05/12/momentum-and-moving-averages/">Momentum and Moving Averages</a></h4>
-    <h5>May 12, 2019</h5>
+    <h4><a href="/2019/05/12/momentum-and-moving-averages/">Momentum and Moving Averages</a></h4>
+    <h5>May 12, 2019 - 3 minutes</h5>
     <h5></h5>
+
     
-<a href="/categories/backtesting">
-    <kbd class="item-cat"> Backtesting </kbd>
-        </a>
-        
+
+        <a href="/categories/backtesting">
+        <kbd class="item-cat"> Backtesting </kbd>
+    </a>
+    
     
     <a href="/tags/r">
         <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
+    </a>
     
 
+</div>
 
 
+    <br> <div class="text-justify">
 
 
+<p><img src="/post/2019-05-12-momentum-and-moving-averages_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><br>
+Both models have shown their capability to outperform depending on liquity and market cap requirements. Adopting a more conservative approach where we only invest in names that has an average turnover value of PhP20.0mn and a maximum market cap of PhP75.0bn ties total performance of both models as of end-2015 and as of May 10, 2019.
+<br></p>
+<p><img src="/post/2019-05-12-momentum-and-moving-averages_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><br>
+This actually boils down to which strategy has the lowest median drawdown, of which the Momentum model takes the cake. It is kinda weird that the Momentum model has the lowest median drawdown compared to the more diversified SMA model and Index, despite the fact that there are times when the model only holds a single name in its portfolio. A fully diversified moving average model might be expensive to implement With a smaller portfolio as it typically holds at least 3-5 names on average.</p>
+<p>Interestingly enough, correlation between Momentum and SMA are pretty low at about 20% and rarely breaching 50% levels, so there is room to take on more names from the SMA to the Momentum model to allow for diversification.
+<br></p>
+<p><img src="/post/2019-05-12-momentum-and-moving-averages_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><br>
+Only two names so far for momentum picks in 2019:
+<br></p>
+<pre><code>## # A tibble: 17 x 10
+## # Groups:   Date [17]
+##    Date       key       px    val   mcap avg.to annual.momentum   px.chg
+##    &lt;date&gt;     &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;           &lt;dbl&gt;    &lt;dbl&gt;
+##  1 2019-01-28 WLCON 13.2   7.61e6 54.3     57.2           0.283  0.00303
+##  2 2019-01-29 WLCON 13.8   2.08e7 56.5     55.4           0.283  0.0408 
+##  3 2019-01-30 WLCON 13.6   1.59e7 55.8     53.4           0.227 -0.0131 
+##  4 2019-01-31 WLCON 13.7   5.69e7 56.2     52.4           0.259  0.00882
+##  5 2019-02-04 WLCON 14.2   9.60e7 58.2     46.5           0.310  0.0290 
+##  6 2019-02-07 WLCON 14.6   9.57e7 59.9     49.9           0.324  0.00137
+##  7 2019-02-08 WLCON 14.6   5.76e7 59.9     47.3           0.329  0      
+##  8 2019-02-11 WLCON 14.6   5.07e7 59.9     47.7           0.346  0      
+##  9 2019-02-12 WLCON 14.9   1.59e8 61.0     52.5           0.404  0.0178 
+## 10 2019-02-14 WLCON 14.5   2.57e7 59.4     52.2           0.335 -0.00685
+## 11 2019-02-15 ZHI    0.38  4.22e7  1.04    20.9           1.03   0.0411 
+## 12 2019-02-18 ZHI    0.34  1.22e7  0.931   21.5           0.818 -0.105  
+## 13 2019-02-19 ZHI    0.32  1.61e7  0.876   22.4           0.730 -0.0588 
+## 14 2019-02-20 ZHI    0.325 5.06e6  0.890   22.7           0.693  0.0156 
+## 15 2019-02-21 ZHI    0.325 1.30e7  0.890   22.2           0.702  0      
+## 16 2019-02-22 ZHI    0.355 2.14e7  0.972   23.3           0.775  0.0923 
+## 17 2019-02-27 ZHI    0.34  1.26e7  0.931   26.3           0.447 -0.0811 
+## # ... with 2 more variables: mom.ntile &lt;int&gt;, mom.return &lt;dbl&gt;</code></pre>
+<p><br>
+Below are simple moving average picks in 2019
+<br></p>
+<pre><code>## # A tibble: 8 x 9
+## # Groups:   key [8]
+##   Date       key      px       val  mcap avg.to   sma   px.chg sma.return
+##   &lt;date&gt;     &lt;chr&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
+## 1 2019-05-10 CHP    2.52 122326100 13.1    64.1  2.11  0.0588     0.0588 
+## 2 2019-05-10 DD    25.5    5833520 60.4    27.6 25.5   0          0      
+## 3 2019-05-10 FLI    1.58   8392070 38.3    23.8  1.55  0.0194     0.0194 
+## 4 2019-05-10 FNI    1.6   41136060  8.82   28.5  1.54 -0.0184    -0.0184 
+## 5 2019-05-10 MWIDE 22      1281110 45.9    40.2 22.0   0          0      
+## 6 2019-05-10 PHEN   1.93  79044510  9.44   48.9  1.60  0.0904     0.0904 
+## 7 2019-05-10 PNB   54      3847614 67.5    36.4 52.9  -0.00277   -0.00277
+## 8 2019-05-10 SSI    3.25  28165050 10.8    56.0  2.93  0          0</code></pre>
+</div>
 
-  
+    
+    
 
+    
 
-<h4><a href="/2019/03/15/ph-factor-returns/">PH Factor Returns</a></h4>
-    <h5>March 15, 2019</h5>
+        <h4 class="page-header">Related</h4>
+
+         <div class="item">
+
+    
+    
+    
+
+    
+    
+      
+    
+
+    <h4><a href="/2019/03/15/ph-factor-returns/">PH Factor Returns</a></h4>
+    <h5>March 15, 2019 - 39 minutes</h5>
     <h5></h5>
+
     
-<a href="/categories/backtesting">
-    <kbd class="item-cat"> Backtesting </kbd>
-        </a>
-        
+
+        <a href="/categories/backtesting">
+        <kbd class="item-cat"> Backtesting </kbd>
+    </a>
+    
     
     <a href="/tags/r">
         <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
+    </a>
     
 
+</div>
+  <div class="item">
 
+    
+    
+    
 
+    
+    
+      
+    
 
-
-
-  
-
-
-<h4><a href="/project/insider-buying-and-selling/">Insider Buying and Selling</a></h4>
-    <h5>February 23, 2019</h5>
+    <h4><a href="/2019/02/02/seasonality-trading-with-natgas/">Seasonality trading with NatGas</a></h4>
+    <h5>February 2, 2019 - 4 minutes</h5>
     <h5></h5>
+
     
-<a href="/categories/charting">
-    <kbd class="item-cat"> charting </kbd>
-        </a>
-        
+
+        <a href="/categories/backtesting">
+        <kbd class="item-cat"> Backtesting </kbd>
+    </a>
+    
     
     <a href="/tags/r">
         <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
+    </a>
     
 
+</div>
+ 
 
-
-
-
-
-
-
-
-<h4><a href="/project/rolling-and-static-forward-per-bands/">Rolling and Static Forward PER Bands</a></h4>
-    <h5>February 22, 2019</h5>
-    <h5></h5>
-    
-<a href="/categories/charting">
-    <kbd class="item-cat"> charting </kbd>
-        </a>
-        
-    
-    <a href="/tags/r">
-        <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
     
 
-
-
-
-
-
-  
-
-
-<h4><a href="/project/rolling-annual-returns-per-return-quantile/">Rolling Annual Returns per Return Quantile</a></h4>
-    <h5>February 21, 2019</h5>
-    <h5></h5>
-    
-<a href="/categories/charting">
-    <kbd class="item-cat"> charting </kbd>
-        </a>
-        
-    
-    <a href="/tags/r">
-        <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
     
 
-
-
-
-
-
-  
-
-
-<h4><a href="/project/top-net-foreign-transaction/">Top Net Foreign Transaction</a></h4>
-    <h5>February 9, 2019</h5>
-    <h5></h5>
-    
-<a href="/categories/charting">
-    <kbd class="item-cat"> charting </kbd>
-        </a>
-        
-    
-    <a href="/tags/r">
-        <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
-    
-
-
-
-
-
-
-  
-
-
-<h4><a href="/project/psei-rolling-annual-returns/">PSEI Rolling Annual Returns</a></h4>
-    <h5>February 5, 2019</h5>
-    <h5></h5>
-    
-<a href="/categories/charting">
-    <kbd class="item-cat"> charting </kbd>
-        </a>
-        
-    
-    <a href="/tags/r">
-        <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
-    
-
-
-
-
-
-
-  
-
-
-<h4><a href="/project/psei-trading-range/">PSEI Trading Range</a></h4>
-    <h5>February 2, 2019</h5>
-    <h5></h5>
-    
-<a href="/categories/charting">
-    <kbd class="item-cat"> charting </kbd>
-        </a>
-        
-    
-    <a href="/tags/r">
-        <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-        
-            <div class="item">
-    
-
-
-
-
-
-
-  
-
-
-<h4><a href="/2019/02/02/seasonality-trading-with-natgas/">Seasonality trading with NatGas</a></h4>
-    <h5>February 2, 2019</h5>
-    <h5></h5>
-    
-<a href="/categories/backtesting">
-    <kbd class="item-cat"> Backtesting </kbd>
-        </a>
-        
-    
-    <a href="/tags/r">
-        <kbd class="item-tag"> R </kbd>
-            </a>
-            
-        
-        </div>
-            
-        
-    
-    
 </main>
-
-
-
 
         <footer id = "bigfooter">
             <div style = "padding:15px;">
