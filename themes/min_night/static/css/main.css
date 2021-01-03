@@ -8,6 +8,7 @@ body {
     display: flex;
     text-align: center;
     flex-direction: column;
+    color: #cccccc
 }
 
 main {
@@ -48,11 +49,12 @@ main {
 /*apply accent colour to links*/
 
 a:link, a:visited {
-    color: #555555;
+    color: #cccccc;
 }
 
 #bigbody main a {
-    color: var(--accent) !important;
+    /* color: var(--accent) !important; */
+    color: #cccccc;
 }
 
 #bigfooter a:link, a:visited {
@@ -79,15 +81,19 @@ a:link, a:visited {
 
 .item {
     padding: 10px 0;
+    color: #cccccc;
 }
 
 .item-cat {
     background-color: #757575;
+    color: #cccccc;
     margin:1px;
 }
 
 .item-tag {
-    background-color: var(--accent);
+    /* background-color: var(--accent);*/
+    background-color: #757575;
+    color: #cccccc;
     margin:1px;
 }
 
@@ -152,7 +158,7 @@ img {
  */
 #bigbody.-nightmode {
     background: var(--accent)!important;
-    color: #333333 !important;
+    color: #333333 !important; /*default #333333*/
     -webkit-filter: invert(1) hue-rotate(180deg);
     filter: invert(1) hue-rotate(180deg)
 }
@@ -175,17 +181,17 @@ img {
 }
 
 /* slider attributes match navbar elements */
-#night-mode-toggle {
+ #night-mode-toggle {
     font-size: 100%;
     padding-top:10px;
-}
+} 
 /* built on-top of Custom Style .ios 
    from: http://www.bootstraptoggle.com/ */
 .toggle.ios, .toggle-on.ios, .toggle-off.ios { border-radius: 20px}
 .toggle.ios .toggle-handle { border-radius: 20px;}
 .toggle.ios .toggle-group {transition: none;-webkit-transition: none;}
 
-.toggle-on {
+ .toggle-on {
     background-color: #e1e1e1;
     color: #373a3d;
 }

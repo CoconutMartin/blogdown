@@ -5,7 +5,7 @@ description = "Past performance could be an indication of the future"
 theme = "min_night"
 disqusShortname = ""
 googleAnalytics = "UA-133552770-1"
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/", "_cache$", "\\.knit\\.md$", "\\.utf8\\.md$"]
 
 [permalinks]
     post = "/:year/:month/:day/:slug/"
@@ -14,10 +14,9 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     author = "Emille Martin Munsayac II"
     description = "Past performance is not indicative of future returns"
     logo = "favicon/birdmath.png"
-    #twitterAuthor = "@natedayta"
-    #githubUsername = "nathancday"
-    accent = "#386890" # dark colors do best
-    backgroundColor = "#f5f5f5"
+    githubUsername = "CoconutMartin"
+    accent = "#2D373E" # dark colors do best; default: "#386890"
+    backgroundColor = "#343e48" #default: "#f5f5f5"
     font = "Mina" # should match the name on Google Fonts!
     highlight = true
     highlightStyle = "lakeside-light" # make this match accent
@@ -39,26 +38,26 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     name = "Projects"
     weight = 3
     
-[[menu.main]]
-    url = "/tags/"
-    name = "Tags"
-    weight = 4
+#[[menu.main]]
+#   url = "/tags/"
+#   name = "Tags"
+#   weight = 4
 
 # Social icons to be shown on the right-hand side of the navigation bar
 # The "name" field should match the name of the icon to be used
 # The list of available icons can be found at http://fontawesome.io/icons/
 
 [[menu.icon]]
-    url = "mailto:emcmunsayac@gmail.com"
+    #url = "mailto:emcmunsayac@gmail.com"
     name = "envelope-o"
     weight = 1
 
 [[menu.icon]]
-    url = "https://twitter.com/coco_not_martin/"
+    #url = "https://twitter.com/coco_not_martin/"
     name = "twitter"
     weight = 3
 
 [[menu.icon]]
-    url = "https://www.linkedin.com/in/emcmunsayac/"
+    #url = "https://www.linkedin.com/in/emcmunsayac/"
     name = "linkedin"
     weight = 4
